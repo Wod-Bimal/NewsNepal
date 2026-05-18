@@ -24,7 +24,6 @@ export const TweetProvider = ({ children }) => {
       setTweets(response.data);
     } catch (err) {
       setError(err.response?.data || 'Failed to fetch tweets');
-      console.error('Error fetching tweets:', err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +65,6 @@ export const TweetProvider = ({ children }) => {
       ));
       return { success: true, data: response.data };
     } catch (err) {
-      console.error('Error liking tweet:', err);
       return { success: false, error: err.response?.data };
     }
   }, []);
@@ -81,7 +79,6 @@ export const TweetProvider = ({ children }) => {
       ));
       return { success: true, data: response.data };
     } catch (err) {
-      console.error('Error retweeting:', err);
       return { success: false, error: err.response?.data };
     }
   }, []);

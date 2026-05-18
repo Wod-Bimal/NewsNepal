@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import axios from 'axios';
+import { tweetService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaHeart, FaRetweet, FaComment, FaTrash } from 'react-icons/fa';
 
@@ -129,10 +129,10 @@ const TweetCard = ({ tweet, onUpdate }) => {
     
     setIsLiking(true);
     try {
-      const response = await axios.post(`/api/tweets/${tweet.id}/like/`);
+      await tweetService.likeTweet(tweet.id);
       onUpdate();
-    } catch (error) {
-      console.error('Error liking tweet:', error);
+    } catch {
+      // Like action failed silently; parent can refresh on next interaction
     } finally {
       setIsLiking(false);
     }
@@ -143,10 +143,10 @@ const TweetCard = ({ tweet, onUpdate }) => {
     
     setIsRetweeting(true);
     try {
-      const response = await axios.post(`/api/tweets/${tweet.id}/retweet/`);
+      await tweetService.retweet(tweet.id);
       onUpdate();
-    } catch (error) {
-      console.error('Error retweeting:', error);
+    } catch {
+      // Retweet action failed silently; parent can refresh on next interaction
     } finally {
       setIsRetweeting(false);
     }
@@ -157,10 +157,10 @@ const TweetCard = ({ tweet, onUpdate }) => {
     
     if (window.confirm('Are you sure you want to delete this tweet?')) {
       try {
-        await axios.delete(`/api/tweets/${tweet.id}/delete/`);
+        await tweetService.deleteTweet(tweet.id);
         onUpdate();
-      } catch (error) {
-        console.error('Error deleting tweet:', error);
+      } catch {
+        // Delete action failed silently
       }
     }
   };

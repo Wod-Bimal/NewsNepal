@@ -24,7 +24,6 @@ export const TopicProvider = ({ children }) => {
       setTopics(response.data);
     } catch (err) {
       setError(err.response?.data || 'Failed to fetch topics');
-      console.error('Error fetching topics:', err);
     } finally {
       setLoading(false);
     }

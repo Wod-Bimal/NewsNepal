@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import axios from 'axios';
 import styled from 'styled-components';
 import TweetForm from '../components/TweetForm.jsx';
 import TweetCard from '../components/TweetCard.jsx';
-import { FaSearch, FaFilter } from 'react-icons/fa';
+import { tweetService, topicService } from '../services/api.js';
 
 const HomeContainer = styled.div`
   max-width: 1200px;
@@ -116,37 +115,36 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
 
-  useEffect(() => {
-    fetchTweets();
-    fetchTopics();
-  }, [selectedTopic, searchQuery]);
-
-  const fetchTweets = async () => {
+  const fetchTweets = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (selectedTopic) params.append('topic', selectedTopic);
-      if (searchQuery) params.append('search', searchQuery);
+      const params = {};
+      if (selectedTopic) params.topic = selectedTopic;
+      if (searchQuery) params.search = searchQuery;
 
-      const response = await axios.get(`/api/tweets/?${params.toString()}`);
+      const response = await tweetService.getTweets(params);
       setTweets(response.data);
       setError(null);
-    } catch (error) {
+    } catch {
       setError('Failed to load tweets. Please try again.');
-      console.error('Error fetching tweets:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTopic, searchQuery]);
 
-  const fetchTopics = async () => {
+  const fetchTopics = useCallback(async () => {
     try {
-      const response = await axios.get('/api/topics/');
+      const response = await topicService.getTopics();
       setTopics(response.data);
-    } catch (error) {
-      console.error('Error fetching topics:', error);
+    } catch {
+      // Topics sidebar is non-critical; fail silently
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTweets();
+    fetchTopics();
+  }, [fetchTweets, fetchTopics]);
 
   const handleTweetCreated = () => {
     fetchTweets();
@@ -211,7 +209,7 @@ const Home = () => {
         {user?.is_staff && (
           <div style={{ marginBottom: '20px' }}>
             <a
-              href="http://localhost:8000/admin/"
+              href="http://localhost:8001/admin/"
               target="_blank"
               rel="noopener noreferrer"
               style={{

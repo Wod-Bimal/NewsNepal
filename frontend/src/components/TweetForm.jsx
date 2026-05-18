@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import axios from 'axios';
+import { tweetService, topicService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaImage, FaTimes } from 'react-icons/fa';
 
@@ -154,10 +154,10 @@ const TweetForm = ({ onTweetCreated }) => {
 
   const fetchTopics = async () => {
     try {
-      const response = await axios.get('/api/topics/');
+      const response = await topicService.getTopics();
       setTopics(response.data);
-    } catch (error) {
-      console.error('Error fetching topics:', error);
+    } catch {
+      // Topics dropdown is optional; fail silently
     }
   };
 
@@ -181,20 +181,12 @@ const TweetForm = ({ onTweetCreated }) => {
     if (!isAuthenticated || !content.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append('content', content);
-    if (image) {
-      formData.append('image', image);
-    }
-    if (selectedTopic) {
-      formData.append('topic', selectedTopic);
-    }
 
     try {
-      const response = await axios.post('/api/tweets/create/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      await tweetService.createTweet({
+        content,
+        image,
+        topic: selectedTopic || undefined,
       });
       
       setContent('');
@@ -205,8 +197,8 @@ const TweetForm = ({ onTweetCreated }) => {
       if (onTweetCreated) {
         onTweetCreated();
       }
-    } catch (error) {
-      console.error('Error creating tweet:', error);
+    } catch {
+      // Tweet creation failed; form state is preserved for retry
     } finally {
       setIsSubmitting(false);
     }

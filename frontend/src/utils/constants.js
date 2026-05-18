@@ -1,5 +1,5 @@
 // API endpoints
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001';
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
     LIST: '/api/topics/',
   },
   COMMENTS: {
-    CREATE: (tweetId) => `/api/tweets/${tweetId}/comments/`,
+    CREATE: (tweetId) => `/api/comments/create/${tweetId}/`,
     LIKE: (id) => `/api/comments/${id}/like/`,
   },
 };

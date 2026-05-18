@@ -59,8 +59,8 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post('/api/auth/logout/');
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // Clear local session even if server request fails
     } finally {
       setUser(null);
     }

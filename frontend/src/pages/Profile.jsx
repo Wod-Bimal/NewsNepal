@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import axios from 'axios';
 import styled from 'styled-components';
 import TweetCard from '../components/TweetCard.jsx';
+import { tweetService } from '../services/api.js';
 
 const ProfileContainer = styled.div`
   max-width: 800px;
@@ -104,27 +104,25 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserTweets();
-    }
-  }, [user]);
+  const fetchUserTweets = useCallback(async () => {
+    if (!user) return;
 
-  const fetchUserTweets = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/tweets/');
-      // Filter tweets by current user
-      const userTweets = response.data.filter(tweet => tweet.author.id === user.id);
-      setUserTweets(userTweets);
+      const response = await tweetService.getTweets();
+      const filtered = response.data.filter(tweet => tweet.author.id === user.id);
+      setUserTweets(filtered);
       setError(null);
-    } catch (error) {
+    } catch {
       setError('Failed to load your tweets. Please try again.');
-      console.error('Error fetching user tweets:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchUserTweets();
+  }, [fetchUserTweets]);
 
   if (loading) {
     return (

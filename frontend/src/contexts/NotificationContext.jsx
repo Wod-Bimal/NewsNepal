@@ -117,6 +117,23 @@ export const useNotification = () => {
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
 
+  const removeNotification = useCallback((id) => {
+    setNotifications(prev => {
+      const notification = prev.find(n => n.id === id);
+      if (notification) {
+        const updatedNotification = { ...notification, isExiting: true };
+        const otherNotifications = prev.filter(n => n.id !== id);
+        
+        setTimeout(() => {
+          setNotifications(otherNotifications);
+        }, 300);
+        
+        return [...otherNotifications, updatedNotification];
+      }
+      return prev;
+    });
+  }, []);
+
   const addNotification = useCallback((notification) => {
     const id = Date.now() + Math.random();
     const newNotification = {
@@ -128,7 +145,6 @@ export const NotificationProvider = ({ children }) => {
 
     setNotifications(prev => [...prev, newNotification]);
 
-    // Auto remove notification after duration
     if (newNotification.duration > 0) {
       setTimeout(() => {
         removeNotification(id);
@@ -136,26 +152,7 @@ export const NotificationProvider = ({ children }) => {
     }
 
     return id;
-  }, []);
-
-  const removeNotification = useCallback((id) => {
-    setNotifications(prev => {
-      const notification = prev.find(n => n.id === id);
-      if (notification) {
-        // Add exiting animation
-        const updatedNotification = { ...notification, isExiting: true };
-        const otherNotifications = prev.filter(n => n.id !== id);
-        
-        // Return with exiting notification for animation
-        setTimeout(() => {
-          setNotifications(otherNotifications);
-        }, 300);
-        
-        return [...otherNotifications, updatedNotification];
-      }
-      return prev;
-    });
-  }, []);
+  }, [removeNotification]);
 
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
