@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
 import TweetForm from '../components/TweetForm.jsx';
 import TweetCard from '../components/TweetCard.jsx';
-import { tweetService, topicService } from '../services/api.js';
+import { newsService, topicService } from '../services/api.js';
 
 const HomeContainer = styled.div`
   max-width: 1200px;
@@ -108,25 +108,25 @@ const ErrorContainer = styled.div`
 
 const Home = () => {
   const { isAuthenticated, user } = useAuth();
-  const [tweets, setTweets] = useState([]);
+  const [news, setNews] = useState([]);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
 
-  const fetchTweets = useCallback(async () => {
+  const fetchNews = useCallback(async () => {
     try {
       setLoading(true);
       const params = {};
       if (selectedTopic) params.topic = selectedTopic;
       if (searchQuery) params.search = searchQuery;
 
-      const response = await tweetService.getTweets(params);
-      setTweets(response.data);
+      const response = await newsService.getNews(params);
+      setNews(response.data);
       setError(null);
     } catch {
-      setError('Failed to load tweets. Please try again.');
+      setError('Failed to load news. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -142,12 +142,12 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetchTweets();
+    fetchNews();
     fetchTopics();
-  }, [fetchTweets, fetchTopics]);
+  }, [fetchNews, fetchTopics]);
 
-  const handleTweetCreated = () => {
-    fetchTweets();
+  const handleNewsCreated = () => {
+    fetchNews();
   };
 
   const handleSearch = (e) => {
@@ -158,12 +158,12 @@ const Home = () => {
     setSelectedTopic(topicId === selectedTopic ? '' : topicId);
   };
 
-  if (loading && tweets.length === 0) {
+  if (loading && news.length === 0) {
     return (
       <HomeContainer>
         <MainContent>
           <LoadingContainer>
-            <p>Loading tweets...</p>
+            <p>Loading news...</p>
           </LoadingContainer>
         </MainContent>
       </HomeContainer>
@@ -173,12 +173,12 @@ const Home = () => {
   return (
     <HomeContainer>
       <MainContent>
-        {isAuthenticated && <TweetForm onTweetCreated={handleTweetCreated} />}
+        {isAuthenticated && <TweetForm onTweetCreated={handleNewsCreated} />}
 
         <SearchContainer>
           <SearchInput
             type="text"
-            placeholder="Search tweets..."
+            placeholder="Search news..."
             value={searchQuery}
             onChange={handleSearch}
           />
@@ -190,16 +190,16 @@ const Home = () => {
           </ErrorContainer>
         )}
 
-        {tweets.length === 0 ? (
+        {news.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#657786' }}>
-            <p>No tweets found. Be the first to share your thoughts!</p>
+            <p>No news posts found. Be the first to share an update!</p>
           </div>
         ) : (
-          tweets.map(tweet => (
+          news.map((item) => (
             <TweetCard
-              key={tweet.id}
-              tweet={tweet}
-              onUpdate={fetchTweets}
+              key={item.id}
+              tweet={item}
+              onUpdate={fetchNews}
             />
           ))
         )}
@@ -236,7 +236,7 @@ const Home = () => {
             onClick={() => handleTopicFilter('')}
           >
             <TopicName>All Topics</TopicName>
-            <TopicCount>{tweets.length} tweets</TopicCount>
+            <TopicCount>{news.length} news posts</TopicCount>
           </TopicItem>
           {topics.map(topic => (
             <TopicItem
@@ -245,7 +245,7 @@ const Home = () => {
               onClick={() => handleTopicFilter(topic.id.toString())}
             >
               <TopicName>{topic.name}</TopicName>
-              <TopicCount>{topic.tweet_count} tweets</TopicCount>
+              <TopicCount>{topic.news_count || topic.tweet_count} news posts</TopicCount>
             </TopicItem>
           ))}
         </TopicsContainer>

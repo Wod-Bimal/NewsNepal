@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { tweetService, topicService } from '../services/api.js';
+import { newsService, topicService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaImage, FaTimes } from 'react-icons/fa';
 
@@ -183,7 +183,7 @@ const TweetForm = ({ onTweetCreated }) => {
     setIsSubmitting(true);
 
     try {
-      await tweetService.createTweet({
+      await newsService.createNews({
         content,
         image,
         topic: selectedTopic || undefined,
@@ -198,7 +198,7 @@ const TweetForm = ({ onTweetCreated }) => {
         onTweetCreated();
       }
     } catch {
-      // Tweet creation failed; form state is preserved for retry
+      // News creation failed; form state is preserved for retry
     } finally {
       setIsSubmitting(false);
     }
@@ -215,7 +215,7 @@ const TweetForm = ({ onTweetCreated }) => {
           src={user?.profile_picture || '/default-avatar.png'} 
           alt={user?.username}
         />
-        <FormTitle>What's happening in Nepal?</FormTitle>
+        <FormTitle>Share a news update</FormTitle>
       </FormHeader>
 
       <Form onSubmit={handleSubmit}>
@@ -234,7 +234,7 @@ const TweetForm = ({ onTweetCreated }) => {
         <TextArea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Share your thoughts about politics in Nepal..."
+          placeholder="Share news about Nepal..."
           maxLength={500}
         />
 
@@ -265,7 +265,7 @@ const TweetForm = ({ onTweetCreated }) => {
             type="submit" 
             disabled={!content.trim() || isSubmitting}
           >
-            {isSubmitting ? 'Posting...' : 'Tweet'}
+            {isSubmitting ? 'Posting...' : 'Post News'}
           </SubmitButton>
         </FormActions>
       </Form>

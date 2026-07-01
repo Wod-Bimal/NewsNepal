@@ -9,13 +9,13 @@ export const API_ENDPOINTS = {
     PROFILE: '/api/auth/profile/',
     UPDATE_PROFILE: '/api/auth/profile/update/',
   },
-  TWEETS: {
-    LIST: '/api/tweets/',
-    CREATE: '/api/tweets/create/',
-    DETAIL: (id) => `/api/tweets/${id}/`,
-    DELETE: (id) => `/api/tweets/${id}/delete/`,
-    LIKE: (id) => `/api/tweets/${id}/like/`,
-    RETWEET: (id) => `/api/tweets/${id}/retweet/`,
+  NEWS: {
+    LIST: '/api/news/',
+    CREATE: '/api/news/create/',
+    DETAIL: (id) => `/api/news/${id}/`,
+    DELETE: (id) => `/api/news/${id}/delete/`,
+    LIKE: (id) => `/api/news/${id}/like/`,
+    SHARE: (id) => `/api/news/${id}/share/`,
   },
   TOPICS: {
     LIST: '/api/topics/',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { tweetService } from '../services/api.js';
+import { newsService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaHeart, FaRetweet, FaComment, FaTrash } from 'react-icons/fa';
 
@@ -111,7 +111,7 @@ const DeleteButton = styled.button`
 const TweetCard = ({ tweet, onUpdate }) => {
   const { user, isAuthenticated } = useAuth();
   const [isLiking, setIsLiking] = useState(false);
-  const [isRetweeting, setIsRetweeting] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -129,7 +129,7 @@ const TweetCard = ({ tweet, onUpdate }) => {
     
     setIsLiking(true);
     try {
-      await tweetService.likeTweet(tweet.id);
+      await newsService.likeNews(tweet.id);
       onUpdate();
     } catch {
       // Like action failed silently; parent can refresh on next interaction
@@ -138,26 +138,26 @@ const TweetCard = ({ tweet, onUpdate }) => {
     }
   };
 
-  const handleRetweet = async () => {
-    if (!isAuthenticated || isRetweeting) return;
+  const handleShare = async () => {
+    if (!isAuthenticated || isSharing) return;
     
-    setIsRetweeting(true);
+    setIsSharing(true);
     try {
-      await tweetService.retweet(tweet.id);
+      await newsService.shareNews(tweet.id);
       onUpdate();
     } catch {
-      // Retweet action failed silently; parent can refresh on next interaction
+      // Share action failed silently; parent can refresh on next interaction
     } finally {
-      setIsRetweeting(false);
+      setIsSharing(false);
     }
   };
 
   const handleDelete = async () => {
     if (!isAuthenticated || user?.id !== tweet.author.id) return;
     
-    if (window.confirm('Are you sure you want to delete this tweet?')) {
+    if (window.confirm('Are you sure you want to delete this news post?')) {
       try {
-        await tweetService.deleteTweet(tweet.id);
+        await newsService.deleteNews(tweet.id);
         onUpdate();
       } catch {
         // Delete action failed silently
@@ -187,7 +187,7 @@ const TweetCard = ({ tweet, onUpdate }) => {
         </UserInfo>
         <Timestamp>{formatDate(tweet.created_at)}</Timestamp>
         {isAuthenticated && user?.id === tweet.author.id && (
-          <DeleteButton onClick={handleDelete} title="Delete tweet">
+          <DeleteButton onClick={handleDelete} title="Delete news post">
             <FaTrash size={14} />
           </DeleteButton>
         )}
@@ -198,7 +198,7 @@ const TweetCard = ({ tweet, onUpdate }) => {
       </TweetContent>
       
       {tweet.image && (
-        <TweetImage src={tweet.image} alt="Tweet image" />
+        <TweetImage src={tweet.image} alt="News image" />
       )}
       
       <TweetActions>
@@ -212,12 +212,12 @@ const TweetCard = ({ tweet, onUpdate }) => {
         </ActionButton>
         
         <ActionButton 
-          active={tweet.is_retweeted}
-          onClick={handleRetweet}
-          disabled={isRetweeting}
+          active={tweet.is_shared}
+          onClick={handleShare}
+          disabled={isSharing}
         >
           <FaRetweet />
-          {tweet.retweet_count}
+          {tweet.share_count}
         </ActionButton>
         
         <ActionButton>

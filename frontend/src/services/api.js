@@ -61,27 +61,27 @@ export const authService = {
   updateProfile: (profileData) => api.put(API_ENDPOINTS.AUTH.UPDATE_PROFILE, profileData),
 };
 
-// Tweet services
-export const tweetService = {
-  getTweets: (params = {}) => {
+// News services
+export const newsService = {
+  getNews: (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    return api.get(`${API_ENDPOINTS.TWEETS.LIST}?${queryString}`);
+    return api.get(`${API_ENDPOINTS.NEWS.LIST}?${queryString}`);
   },
-  createTweet: (tweetData) => {
+  createNews: (newsData) => {
     const formData = new FormData();
-    Object.entries(tweetData).forEach(([key, value]) => {
+    Object.entries(newsData).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
         formData.append(key, value);
       }
     });
-    return api.post(API_ENDPOINTS.TWEETS.CREATE, formData, {
+    return api.post(API_ENDPOINTS.NEWS.CREATE, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  getTweet: (id) => api.get(API_ENDPOINTS.TWEETS.DETAIL(id)),
-  deleteTweet: (id) => api.delete(API_ENDPOINTS.TWEETS.DELETE(id)),
-  likeTweet: (id) => api.post(API_ENDPOINTS.TWEETS.LIKE(id)),
-  retweet: (id) => api.post(API_ENDPOINTS.TWEETS.RETWEET(id)),
+  getNewsItem: (id) => api.get(API_ENDPOINTS.NEWS.DETAIL(id)),
+  deleteNews: (id) => api.delete(API_ENDPOINTS.NEWS.DELETE(id)),
+  likeNews: (id) => api.post(API_ENDPOINTS.NEWS.LIKE(id)),
+  shareNews: (id) => api.post(API_ENDPOINTS.NEWS.SHARE(id)),
 };
 
 // Topic services

@@ -11,6 +11,6 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering = ['-created_at']
     
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = list(getattr(UserAdmin, 'fieldsets', []) or []) + [
         ('Additional Info', {'fields': ('bio', 'location', 'birth_date', 'profile_picture')}),
-    )
+    ]

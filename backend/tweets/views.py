@@ -14,9 +14,9 @@ User = get_user_model()
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def user_tweets(request, username):
-    """Get all tweets by a specific user."""
+    """Get all news posts by a specific user."""
     user = get_object_or_404(User, username=username)
-    tweets = Tweet.objects.filter(author=user).select_related('author', 'topic').prefetch_related('likes', 'retweets', 'comments')
+    tweets = Tweet.objects.filter(author=user).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
     serializer = TweetSerializer(tweets, many=True, context={'request': request})
     return Response(serializer.data)
 
@@ -39,17 +39,17 @@ class TopicViewSet(ModelViewSet):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def topic_tweets(request, pk):
-    """Get tweets for a specific topic."""
-    tweets = Tweet.objects.filter(topic_id=pk).select_related('author', 'topic').prefetch_related('likes', 'retweets', 'comments')
+    """Get news posts for a specific topic."""
+    tweets = Tweet.objects.filter(topic_id=pk).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
     serializer = TweetSerializer(tweets, many=True, context={'request': request})
     return Response(serializer.data)
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def tweet_list(request):
-    """Get list of tweets with optional filtering."""
-    queryset = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'retweets', 'comments')
+def news_list(request):
+    """Get list of news posts with optional filtering."""
+    queryset = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
     
     # Filter by topic if provided
     topic_id = request.GET.get('topic')
@@ -60,6 +60,8 @@ def tweet_list(request):
     search = request.GET.get('search')
     if search:
         queryset = queryset.filter(
+            Q(title__icontains=search) |
+            Q(summary__icontains=search) |
             Q(content__icontains=search) |
             Q(author__username__icontains=search) |
             Q(author__first_name__icontains=search) |
@@ -72,8 +74,8 @@ def tweet_list(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def tweet_create(request):
-    """Create a new tweet."""
+def news_create(request):
+    """Create a new news post."""
     serializer = TweetCreateSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         tweet = serializer.save()
@@ -84,8 +86,8 @@ def tweet_create(request):
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
-def tweet_update(request, pk):
-    """Update a tweet."""
+def news_update(request, pk):
+    """Update a news post."""
     try:
         tweet = Tweet.objects.get(pk=pk)
         if tweet.author != request.user:
@@ -97,39 +99,39 @@ def tweet_update(request, pk):
             return Response(TweetSerializer(updated_tweet, context={'request': request}).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def tweet_detail(request, pk):
-    """Get a specific tweet."""
+def news_detail(request, pk):
+    """Get a specific news post."""
     try:
-        tweet = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'retweets', 'comments').get(pk=pk)
+        tweet = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments').get(pk=pk)
         serializer = TweetSerializer(tweet, context={'request': request})
         return Response(serializer.data)
     except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def tweet_delete(request, pk):
-    """Delete a tweet (only by author)."""
+def news_delete(request, pk):
+    """Delete a news post (only by author)."""
     try:
         tweet = Tweet.objects.get(pk=pk)
         if tweet.author != request.user:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         tweet.delete()
-        return Response({'message': 'Tweet deleted successfully'}, status=status.HTTP_200_OK)
+        return Response({'message': 'News post deleted successfully'}, status=status.HTTP_200_OK)
     except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def tweet_like(request, pk):
-    """Like or unlike a tweet."""
+def news_like(request, pk):
+    """Like or unlike a news post."""
     try:
         tweet = Tweet.objects.get(pk=pk)
         if tweet.likes.filter(id=request.user.id).exists():
@@ -144,28 +146,28 @@ def tweet_like(request, pk):
             'like_count': tweet.like_count
         }, status=status.HTTP_200_OK)
     except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def tweet_retweet(request, pk):
-    """Retweet or unretweet a tweet."""
+def news_share(request, pk):
+    """Share or unshare a news post."""
     try:
         tweet = Tweet.objects.get(pk=pk)
-        if tweet.retweets.filter(id=request.user.id).exists():
-            tweet.retweets.remove(request.user)
-            retweeted = False
+        if tweet.shares.filter(id=request.user.id).exists():
+            tweet.shares.remove(request.user)
+            shared = False
         else:
-            tweet.retweets.add(request.user)
-            retweeted = True
+            tweet.shares.add(request.user)
+            shared = True
         
         return Response({
-            'retweeted': retweeted,
-            'retweet_count': tweet.retweet_count
+            'shared': shared,
+            'share_count': tweet.share_count
         }, status=status.HTTP_200_OK)
     except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

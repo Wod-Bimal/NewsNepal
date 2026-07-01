@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { authService } from '../services/api.js';
 
 const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await axios.get('/api/auth/profile/');
+      const response = await authService.getProfile();
       setUser(response.data);
     } catch (error) {
       setUser(null);
@@ -32,33 +32,33 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await axios.post('/api/auth/login/', credentials);
+      const response = await authService.login(credentials);
       setUser(response.data);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data || { error: 'Login failed' }
+      return {
+        success: false,
+        error: error.response?.data || { error: 'Login failed' },
       };
     }
   };
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register/', userData);
+      const response = await authService.register(userData);
       setUser(response.data);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data || { error: 'Registration failed' }
+      return {
+        success: false,
+        error: error.response?.data || { error: 'Registration failed' },
       };
     }
   };
 
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout/');
+      await authService.logout();
     } catch {
       // Clear local session even if server request fails
     } finally {
@@ -68,13 +68,13 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('/api/auth/profile/update/', profileData);
+      const response = await authService.updateProfile(profileData);
       setUser(response.data);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data || { error: 'Profile update failed' }
+      return {
+        success: false,
+        error: error.response?.data || { error: 'Profile update failed' },
       };
     }
   };

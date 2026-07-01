@@ -1,67 +1,67 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { tweetService } from '../services/api.js';
+import { newsService } from '../services/api.js';
 
-const TweetContext = createContext();
+const NewsContext = createContext();
 
-export const useTweets = () => {
-  const context = useContext(TweetContext);
+export const useNews = () => {
+  const context = useContext(NewsContext);
   if (!context) {
-    throw new Error('useTweets must be used within a TweetProvider');
+    throw new Error('useNews must be used within a NewsProvider');
   }
   return context;
 };
 
-export const TweetProvider = ({ children }) => {
-  const [tweets, setTweets] = useState([]);
+export const NewsProvider = ({ children }) => {
+  const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchTweets = useCallback(async (params = {}) => {
+  const fetchNews = useCallback(async (params = {}) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await tweetService.getTweets(params);
-      setTweets(response.data);
+      const response = await newsService.getNews(params);
+      setNews(response.data);
     } catch (err) {
-      setError(err.response?.data || 'Failed to fetch tweets');
+      setError(err.response?.data || 'Failed to fetch news');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const createTweet = useCallback(async (tweetData) => {
+  const createNews = useCallback(async (newsData) => {
     try {
       setError(null);
-      const response = await tweetService.createTweet(tweetData);
-      setTweets(prev => [response.data, ...prev]);
+      const response = await newsService.createNews(newsData);
+      setNews(prev => [response.data, ...prev]);
       return { success: true, data: response.data };
     } catch (err) {
-      const error = err.response?.data || 'Failed to create tweet';
+      const error = err.response?.data || 'Failed to create news post';
       setError(error);
       return { success: false, error };
     }
   }, []);
 
-  const deleteTweet = useCallback(async (tweetId) => {
+  const deleteNews = useCallback(async (newsId) => {
     try {
       setError(null);
-      await tweetService.deleteTweet(tweetId);
-      setTweets(prev => prev.filter(tweet => tweet.id !== tweetId));
+      await newsService.deleteNews(newsId);
+      setNews(prev => prev.filter(item => item.id !== newsId));
       return { success: true };
     } catch (err) {
-      const error = err.response?.data || 'Failed to delete tweet';
+      const error = err.response?.data || 'Failed to delete news post';
       setError(error);
       return { success: false, error };
     }
   }, []);
 
-  const likeTweet = useCallback(async (tweetId) => {
+  const likeNews = useCallback(async (newsId) => {
     try {
-      const response = await tweetService.likeTweet(tweetId);
-      setTweets(prev => prev.map(tweet => 
-        tweet.id === tweetId 
-          ? { ...tweet, is_liked: response.data.liked, like_count: response.data.like_count }
-          : tweet
+      const response = await newsService.likeNews(newsId);
+      setNews(prev => prev.map(item => 
+        item.id === newsId 
+          ? { ...item, is_liked: response.data.liked, like_count: response.data.like_count }
+          : item
       ));
       return { success: true, data: response.data };
     } catch (err) {
@@ -69,13 +69,13 @@ export const TweetProvider = ({ children }) => {
     }
   }, []);
 
-  const retweet = useCallback(async (tweetId) => {
+  const shareNews = useCallback(async (newsId) => {
     try {
-      const response = await tweetService.retweet(tweetId);
-      setTweets(prev => prev.map(tweet => 
-        tweet.id === tweetId 
-          ? { ...tweet, is_retweeted: response.data.retweeted, retweet_count: response.data.retweet_count }
-          : tweet
+      const response = await newsService.shareNews(newsId);
+      setNews(prev => prev.map(item => 
+        item.id === newsId 
+          ? { ...item, is_shared: response.data.shared, share_count: response.data.share_count }
+          : item
       ));
       return { success: true, data: response.data };
     } catch (err) {

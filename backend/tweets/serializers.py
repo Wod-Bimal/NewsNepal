@@ -47,18 +47,19 @@ class TweetSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     like_count = serializers.ReadOnlyField()
-    retweet_count = serializers.ReadOnlyField()
+    share_count = serializers.ReadOnlyField()
     comment_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
-    is_retweeted = serializers.SerializerMethodField()
+    is_shared = serializers.SerializerMethodField()
     comments = CommentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Tweet
-        fields = ['id', 'author', 'content', 'topic', 'image', 'created_at', 
-                 'updated_at', 'like_count', 'retweet_count', 'comment_count',
-                 'is_liked', 'is_retweeted', 'comments']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'author', 'title', 'summary', 'content', 'topic', 'source_url', 'image',
+                 'published_at', 'status', 'created_at', 'updated_at',
+                 'like_count', 'share_count', 'comment_count',
+                 'is_liked', 'is_shared', 'comments']
+        read_only_fields = ['id', 'published_at', 'created_at', 'updated_at']
     
     def get_comment_count(self, obj):
         return obj.comments.count()
@@ -69,19 +70,19 @@ class TweetSerializer(serializers.ModelSerializer):
             return obj.likes.filter(id=request.user.id).exists()
         return False
     
-    def get_is_retweeted(self, obj):
+    def get_is_shared(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.retweets.filter(id=request.user.id).exists()
+            return obj.shares.filter(id=request.user.id).exists()
         return False
 
 
 class TweetCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating tweets."""
+    """Serializer for creating news posts."""
     
     class Meta:
         model = Tweet
-        fields = ['content', 'topic', 'image']
+        fields = ['title', 'summary', 'content', 'topic', 'source_url', 'image', 'published_at', 'status']
     
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user

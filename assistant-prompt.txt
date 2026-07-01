@@ -1,0 +1,14 @@
+Current task: finish frontend news refactor and then fix login/register authentication.
+
+Files currently being updated:
+- frontend/src/contexts/TweetContext.jsx
+- frontend/src/App.jsx
+- frontend/src/components/TweetCard.jsx
+- frontend/src/components/TweetForm.jsx
+- frontend/src/pages/Home.jsx
+- frontend/src/pages/Profile.jsx
+- frontend/src/contexts/AuthContext.jsx
+
+What I need from you: add your prompt or instructions below this line.
+
+---

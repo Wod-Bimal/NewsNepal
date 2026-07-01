@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
 import TweetCard from '../components/TweetCard.jsx';
-import { tweetService } from '../services/api.js';
+import { newsService } from '../services/api.js';
 
 const ProfileContainer = styled.div`
   max-width: 800px;
@@ -100,29 +100,29 @@ const ErrorContainer = styled.div`
 
 const Profile = () => {
   const { user } = useAuth();
-  const [userTweets, setUserTweets] = useState([]);
+  const [userNews, setUserNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchUserTweets = useCallback(async () => {
+  const fetchUserNews = useCallback(async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      const response = await tweetService.getTweets();
-      const filtered = response.data.filter(tweet => tweet.author.id === user.id);
-      setUserTweets(filtered);
+      const response = await newsService.getNews();
+      const filtered = response.data.filter((item) => item.author.id === user.id);
+      setUserNews(filtered);
       setError(null);
     } catch {
-      setError('Failed to load your tweets. Please try again.');
+      setError('Failed to load your news posts. Please try again.');
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    fetchUserTweets();
-  }, [fetchUserTweets]);
+    fetchUserNews();
+  }, [fetchUserNews]);
 
   if (loading) {
     return (
@@ -152,20 +152,20 @@ const Profile = () => {
         
         <StatsContainer>
           <Stat>
-            <StatNumber>{userTweets.length}</StatNumber>
-            <StatLabel>Tweets</StatLabel>
+            <StatNumber>{userNews.length}</StatNumber>
+            <StatLabel>News Posts</StatLabel>
           </Stat>
           <Stat>
             <StatNumber>
-              {userTweets.reduce((sum, tweet) => sum + tweet.like_count, 0)}
+              {userNews.reduce((sum, newsItem) => sum + newsItem.like_count, 0)}
             </StatNumber>
             <StatLabel>Likes Received</StatLabel>
           </Stat>
           <Stat>
             <StatNumber>
-              {userTweets.reduce((sum, tweet) => sum + tweet.retweet_count, 0)}
+              {userNews.reduce((sum, newsItem) => sum + newsItem.share_count, 0)}
             </StatNumber>
-            <StatLabel>Retweets</StatLabel>
+            <StatLabel>Shares</StatLabel>
           </Stat>
         </StatsContainer>
       </ProfileHeader>
@@ -179,16 +179,16 @@ const Profile = () => {
           </ErrorContainer>
         )}
 
-        {userTweets.length === 0 ? (
+        {userNews.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#657786' }}>
-            <p>You haven't posted any tweets yet. Share your thoughts about politics in Nepal!</p>
+            <p>You haven't posted any news yet. Share your thoughts about politics in Nepal!</p>
           </div>
         ) : (
-          userTweets.map(tweet => (
+          userNews.map((newsItem) => (
             <TweetCard 
-              key={tweet.id} 
-              tweet={tweet} 
-              onUpdate={fetchUserTweets}
+              key={newsItem.id} 
+              tweet={newsItem} 
+              onUpdate={fetchUserNews}
             />
           ))
         )}

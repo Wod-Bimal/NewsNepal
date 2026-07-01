@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
-import { TweetProvider } from './contexts/TweetContext.jsx';
+import { NewsProvider } from './contexts/TweetContext.jsx';
 import { TopicProvider } from './contexts/TopicContext.jsx';
 import { NotificationProvider } from './contexts/NotificationContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -18,7 +18,7 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <AuthProvider>
-          <TweetProvider>
+          <NewsProvider>
             <TopicProvider>
               <Router>
                 <div className="App">
@@ -41,7 +41,7 @@ function App() {
                 </div>
               </Router>
             </TopicProvider>
-          </TweetProvider>
+          </NewsProvider>
         </AuthProvider>
       </NotificationProvider>
     </ErrorBoundary>

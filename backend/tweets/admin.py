@@ -11,17 +11,17 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(Tweet)
 class TweetAdmin(admin.ModelAdmin):
-    """Admin for Tweet model."""
-    list_display = ['author', 'content_preview', 'topic', 'like_count', 'retweet_count', 'created_at']
-    list_filter = ['topic', 'created_at']
-    search_fields = ['content', 'author__username']
+    """Admin for news post model."""
+    list_display = ['author', 'title', 'topic', 'like_count', 'share_count', 'created_at']
+    list_filter = ['topic', 'status', 'created_at']
+    search_fields = ['title', 'summary', 'content', 'author__username']
     ordering = ['-created_at']
-    readonly_fields = ['like_count', 'retweet_count', 'created_at', 'updated_at']
+    readonly_fields = ['like_count', 'share_count', 'created_at', 'updated_at']
     date_hierarchy = 'created_at'
     
     def content_preview(self, obj):
-        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
-    content_preview.short_description = 'Content'
+        return obj.summary[:50] + '...' if obj.summary else obj.content[:50] + '...'
+    content_preview.short_description = 'Preview'
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
