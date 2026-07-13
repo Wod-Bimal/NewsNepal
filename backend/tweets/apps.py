@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class TweetsConfig(AppConfig):
+class NewsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'tweets'
+    verbose_name = 'News'

@@ -1,23 +1,23 @@
 from rest_framework import serializers
 from accounts.models import User
-from .models import Tweet, Topic, Comment
+from .models import News, Topic, Comment
 
 
 class TopicSerializer(serializers.ModelSerializer):
     """Serializer for Topic model."""
-    tweet_count = serializers.SerializerMethodField()
+    news_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Topic
-        fields = ['id', 'name', 'description', 'color', 'created_at', 'tweet_count']
+        fields = ['id', 'name', 'description', 'color', 'created_at', 'news_count']
         read_only_fields = ['id', 'created_at']
     
-    def get_tweet_count(self, obj):
-        return obj.tweets.count()
+    def get_news_count(self, obj):
+        return obj.news.count()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Simplified user serializer for tweets."""
+    """Simplified user serializer for news posts."""
     
     class Meta:
         model = User
@@ -42,8 +42,8 @@ class CommentSerializer(serializers.ModelSerializer):
         return False
 
 
-class TweetSerializer(serializers.ModelSerializer):
-    """Serializer for Tweet model."""
+class NewsSerializer(serializers.ModelSerializer):
+    """Serializer for News model."""
     author = UserSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     like_count = serializers.ReadOnlyField()
@@ -54,7 +54,7 @@ class TweetSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     
     class Meta:
-        model = Tweet
+        model = News
         fields = ['id', 'author', 'title', 'summary', 'content', 'topic', 'source_url', 'image',
                  'published_at', 'status', 'created_at', 'updated_at',
                  'like_count', 'share_count', 'comment_count',
@@ -77,11 +77,11 @@ class TweetSerializer(serializers.ModelSerializer):
         return False
 
 
-class TweetCreateSerializer(serializers.ModelSerializer):
+class NewsCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating news posts."""
     
     class Meta:
-        model = Tweet
+        model = News
         fields = ['title', 'summary', 'content', 'topic', 'source_url', 'image', 'published_at', 'status']
     
     def create(self, validated_data):

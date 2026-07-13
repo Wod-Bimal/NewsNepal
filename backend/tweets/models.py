@@ -9,7 +9,7 @@ class Topic(models.Model):
     """Model for political topics/categories."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    color = models.CharField(max_length=7, default='#1DA1F2')  # Hex color code
+    color = models.CharField(max_length=7, default='#1DA1F2')
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -19,15 +19,15 @@ class Topic(models.Model):
         return self.name
 
 
-class Tweet(models.Model):
+class News(models.Model):
     """Model for news posts."""
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tweets')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='news')
     title = models.CharField(max_length=255)
     summary = models.TextField(max_length=500, blank=True)
     content = models.TextField(max_length=500)
-    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='tweets')
+    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name='news')
     source_url = models.URLField(max_length=500, blank=True, null=True)
-    image = models.ImageField(upload_to='tweet_images/', null=True, blank=True)
+    image = models.ImageField(upload_to='news_images/', null=True, blank=True)
     published_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(
         max_length=20,
@@ -36,8 +36,8 @@ class Tweet(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(User, related_name='liked_tweets', blank=True)
-    shares = models.ManyToManyField(User, related_name='shared_tweets', blank=True)
+    likes = models.ManyToManyField(User, related_name='liked_news', blank=True)
+    shares = models.ManyToManyField(User, related_name='shared_news', blank=True)
     
     class Meta:
         ordering = ['-created_at']
@@ -55,8 +55,8 @@ class Tweet(models.Model):
 
 
 class Comment(models.Model):
-    """Model for tweet comments."""
-    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE, related_name='comments')
+    """Model for news comments."""
+    news = models.ForeignKey(News, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)

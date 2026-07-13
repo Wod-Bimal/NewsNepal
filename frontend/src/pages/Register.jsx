@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 
 const RegisterContainer = styled.div`
@@ -112,6 +113,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { register } = useAuth();
+  const { showSuccess } = useNotification();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -135,7 +137,8 @@ const Register = () => {
     const result = await register(formData);
     
     if (result.success) {
-      navigate('/');
+      showSuccess('Account created! Welcome to NewsNepal.');
+      navigate('/feed');
     } else {
       setError(result.error?.error || 'Registration failed. Please try again.');
     }

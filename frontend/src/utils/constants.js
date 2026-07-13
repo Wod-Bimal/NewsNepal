@@ -1,5 +1,5 @@
 // API endpoints
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -21,14 +21,14 @@ export const API_ENDPOINTS = {
     LIST: '/api/topics/',
   },
   COMMENTS: {
-    CREATE: (tweetId) => `/api/comments/create/${tweetId}/`,
+    CREATE: (newsId) => `/api/comments/create/${newsId}/`,
     LIKE: (id) => `/api/comments/${id}/like/`,
   },
 };
 
 // App constants
 export const APP_CONFIG = {
-  MAX_TWEET_LENGTH: 500,
+  MAX_NEWS_LENGTH: 500,
   MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   PAGINATION_SIZE: 20,

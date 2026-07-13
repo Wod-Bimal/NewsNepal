@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django.db.models import Q
-from .models import Tweet, Topic, Comment
-from .serializers import TweetSerializer, TweetCreateSerializer, TopicSerializer, CommentSerializer
+from .models import News, Topic, Comment
+from .serializers import NewsSerializer, NewsCreateSerializer, TopicSerializer, CommentSerializer
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
@@ -13,11 +13,11 @@ User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def user_tweets(request, username):
+def user_news(request, username):
     """Get all news posts by a specific user."""
     user = get_object_or_404(User, username=username)
-    tweets = Tweet.objects.filter(author=user).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
-    serializer = TweetSerializer(tweets, many=True, context={'request': request})
+    news_items = News.objects.filter(author=user).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
+    serializer = NewsSerializer(news_items, many=True, context={'request': request})
     return Response(serializer.data)
 
 
@@ -28,7 +28,6 @@ class TopicViewSet(ModelViewSet):
     pagination_class = None
     
     def get_permissions(self):
-        """Allow read access to anyone, but write access only to admins."""
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
@@ -38,10 +37,10 @@ class TopicViewSet(ModelViewSet):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def topic_tweets(request, pk):
+def topic_news(request, pk):
     """Get news posts for a specific topic."""
-    tweets = Tweet.objects.filter(topic_id=pk).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
-    serializer = TweetSerializer(tweets, many=True, context={'request': request})
+    news_items = News.objects.filter(topic_id=pk).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
+    serializer = NewsSerializer(news_items, many=True, context={'request': request})
     return Response(serializer.data)
 
 
@@ -49,14 +48,12 @@ def topic_tweets(request, pk):
 @permission_classes([AllowAny])
 def news_list(request):
     """Get list of news posts with optional filtering."""
-    queryset = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
+    queryset = News.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
     
-    # Filter by topic if provided
     topic_id = request.GET.get('topic')
     if topic_id:
         queryset = queryset.filter(topic_id=topic_id)
     
-    # Search functionality
     search = request.GET.get('search')
     if search:
         queryset = queryset.filter(
@@ -68,7 +65,7 @@ def news_list(request):
             Q(author__last_name__icontains=search)
         )
     
-    serializer = TweetSerializer(queryset, many=True, context={'request': request})
+    serializer = NewsSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
 
@@ -76,10 +73,10 @@ def news_list(request):
 @permission_classes([IsAuthenticated])
 def news_create(request):
     """Create a new news post."""
-    serializer = TweetCreateSerializer(data=request.data, context={'request': request})
+    serializer = NewsCreateSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        tweet = serializer.save()
-        response_serializer = TweetSerializer(tweet, context={'request': request})
+        news_item = serializer.save()
+        response_serializer = NewsSerializer(news_item, context={'request': request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,16 +86,16 @@ def news_create(request):
 def news_update(request, pk):
     """Update a news post."""
     try:
-        tweet = Tweet.objects.get(pk=pk)
-        if tweet.author != request.user:
+        news_item = News.objects.get(pk=pk)
+        if news_item.author != request.user:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-        serializer = TweetCreateSerializer(tweet, data=request.data, partial=True, context={'request': request})
+        serializer = NewsCreateSerializer(news_item, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
-            updated_tweet = serializer.save()
-            return Response(TweetSerializer(updated_tweet, context={'request': request}).data)
+            updated_news = serializer.save()
+            return Response(NewsSerializer(updated_news, context={'request': request}).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Tweet.DoesNotExist:
+    except News.DoesNotExist:
         return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -107,10 +104,10 @@ def news_update(request, pk):
 def news_detail(request, pk):
     """Get a specific news post."""
     try:
-        tweet = Tweet.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments').get(pk=pk)
-        serializer = TweetSerializer(tweet, context={'request': request})
+        news_item = News.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments').get(pk=pk)
+        serializer = NewsSerializer(news_item, context={'request': request})
         return Response(serializer.data)
-    except Tweet.DoesNotExist:
+    except News.DoesNotExist:
         return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -119,12 +116,12 @@ def news_detail(request, pk):
 def news_delete(request, pk):
     """Delete a news post (only by author)."""
     try:
-        tweet = Tweet.objects.get(pk=pk)
-        if tweet.author != request.user:
+        news_item = News.objects.get(pk=pk)
+        if news_item.author != request.user:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        tweet.delete()
+        news_item.delete()
         return Response({'message': 'News post deleted successfully'}, status=status.HTTP_200_OK)
-    except Tweet.DoesNotExist:
+    except News.DoesNotExist:
         return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -133,19 +130,19 @@ def news_delete(request, pk):
 def news_like(request, pk):
     """Like or unlike a news post."""
     try:
-        tweet = Tweet.objects.get(pk=pk)
-        if tweet.likes.filter(id=request.user.id).exists():
-            tweet.likes.remove(request.user)
+        news_item = News.objects.get(pk=pk)
+        if news_item.likes.filter(id=request.user.id).exists():
+            news_item.likes.remove(request.user)
             liked = False
         else:
-            tweet.likes.add(request.user)
+            news_item.likes.add(request.user)
             liked = True
         
         return Response({
             'liked': liked,
-            'like_count': tweet.like_count
+            'like_count': news_item.like_count
         }, status=status.HTTP_200_OK)
-    except Tweet.DoesNotExist:
+    except News.DoesNotExist:
         return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -154,36 +151,36 @@ def news_like(request, pk):
 def news_share(request, pk):
     """Share or unshare a news post."""
     try:
-        tweet = Tweet.objects.get(pk=pk)
-        if tweet.shares.filter(id=request.user.id).exists():
-            tweet.shares.remove(request.user)
+        news_item = News.objects.get(pk=pk)
+        if news_item.shares.filter(id=request.user.id).exists():
+            news_item.shares.remove(request.user)
             shared = False
         else:
-            tweet.shares.add(request.user)
+            news_item.shares.add(request.user)
             shared = True
         
         return Response({
             'shared': shared,
-            'share_count': tweet.share_count
+            'share_count': news_item.share_count
         }, status=status.HTTP_200_OK)
-    except Tweet.DoesNotExist:
+    except News.DoesNotExist:
         return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def comment_create(request, tweet_pk):
-    """Create a comment on a tweet."""
+def comment_create(request, news_pk):
+    """Create a comment on a news post."""
     try:
-        tweet = Tweet.objects.get(pk=tweet_pk)
+        news_item = News.objects.get(pk=news_pk)
         serializer = CommentSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            comment = serializer.save(tweet=tweet, author=request.user)
+            comment = serializer.save(news=news_item, author=request.user)
             return Response(CommentSerializer(comment, context={'request': request}).data, 
                           status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except Tweet.DoesNotExist:
-        return Response({'error': 'Tweet not found'}, status=status.HTTP_404_NOT_FOUND)
+    except News.DoesNotExist:
+        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

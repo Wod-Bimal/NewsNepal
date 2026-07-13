@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import { newsService, topicService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaImage, FaTimes } from 'react-icons/fa';
@@ -139,8 +140,9 @@ const TopicSelect = styled.select`
   }
 `;
 
-const TweetForm = ({ onTweetCreated }) => {
+const NewsForm = ({ onNewsCreated }) => {
   const { user, isAuthenticated } = useAuth();
+  const { showSuccess, showError } = useNotification();
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -157,7 +159,6 @@ const TweetForm = ({ onTweetCreated }) => {
       const response = await topicService.getTopics();
       setTopics(response.data);
     } catch {
-      // Topics dropdown is optional; fail silently
     }
   };
 
@@ -193,12 +194,13 @@ const TweetForm = ({ onTweetCreated }) => {
       setImage(null);
       setImagePreview(null);
       setSelectedTopic('');
+      showSuccess('News posted!');
       
-      if (onTweetCreated) {
-        onTweetCreated();
+      if (onNewsCreated) {
+        onNewsCreated();
       }
     } catch {
-      // News creation failed; form state is preserved for retry
+      showError('Failed to post news');
     } finally {
       setIsSubmitting(false);
     }
@@ -212,7 +214,7 @@ const TweetForm = ({ onTweetCreated }) => {
     <FormContainer>
       <FormHeader>
         <Avatar 
-          src={user?.profile_picture || '/default-avatar.png'} 
+          src={user?.profile_picture || '/default-avatar.svg'} 
           alt={user?.username}
         />
         <FormTitle>Share a news update</FormTitle>
@@ -273,4 +275,4 @@ const TweetForm = ({ onTweetCreated }) => {
   );
 };
 
-export default TweetForm;
+export default NewsForm;

@@ -1,11 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
-import TweetForm from '../components/TweetForm.jsx';
-import TweetCard from '../components/TweetCard.jsx';
+import NewsForm from '../components/NewsForm.jsx';
+import NewsCard from '../components/NewsCard.jsx';
 import { newsService, topicService } from '../services/api.js';
 
-const HomeContainer = styled.div`
+const TabsContainer = styled.div`
+  display: flex;
+  background: white;
+  border: 1px solid #E1E8ED;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+`;
+
+const Tab = styled.button`
+  flex: 1;
+  padding: 14px;
+  background: ${props => props.active ? '#1DA1F2' : 'white'};
+  color: ${props => props.active ? 'white' : '#14171A'};
+  border: none;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: ${props => props.active ? '#1991DB' : '#F7F9FA'}; }
+`;
+
+const FeedContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -106,29 +128,44 @@ const ErrorContainer = styled.div`
   border: 1px solid #FCE7F3;
 `;
 
-const Home = () => {
-  const { isAuthenticated, user } = useAuth();
+const LoadMoreButton = styled.button`
+  display: block; width: 100%; padding: 14px; background: white; border: 1px solid #E1E8ED;
+  border-radius: 12px; color: #1DA1F2; font-weight: 700; font-size: 15px; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 20px;
+  &:hover { background: #F7F9FA; } &:disabled { color: #AAB8C2; cursor: not-allowed; }
+`;
+
+const Feed = () => {
+  const { user } = useAuth();
   const [news, setNews] = useState([]);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [feedTab, setFeedTab] = useState('for-you');
+  const nextPageRef = useRef(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchNews = useCallback(async () => {
+  const fetchNews = useCallback(async (append = false) => {
     try {
-      setLoading(true);
-      const params = {};
+      if (append) setLoadingMore(true); else setLoading(true);
+      const params = { page: append ? nextPageRef.current + 1 : 1 };
       if (selectedTopic) params.topic = selectedTopic;
       if (searchQuery) params.search = searchQuery;
 
       const response = await newsService.getNews(params);
-      setNews(response.data);
+      const data = response.data.results || response.data;
+      const next = response.data.next;
+      setNews(prev => append ? [...prev, ...data] : data);
+      setHasMore(!!next);
+      nextPageRef.current = append ? nextPageRef.current + 1 : 1;
       setError(null);
     } catch {
       setError('Failed to load news. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(false); setLoadingMore(false);
     }
   }, [selectedTopic, searchQuery]);
 
@@ -160,20 +197,33 @@ const Home = () => {
 
   if (loading && news.length === 0) {
     return (
-      <HomeContainer>
+      <FeedContainer>
         <MainContent>
           <LoadingContainer>
             <p>Loading news...</p>
           </LoadingContainer>
         </MainContent>
-      </HomeContainer>
+      </FeedContainer>
     );
   }
 
   return (
-    <HomeContainer>
+    <FeedContainer>
       <MainContent>
-        {isAuthenticated && <TweetForm onTweetCreated={handleNewsCreated} />}
+        <TabsContainer>
+          <Tab active={feedTab === 'for-you'} onClick={() => setFeedTab('for-you')}>For You</Tab>
+          <Tab active={feedTab === 'trending'} onClick={() => setFeedTab('trending')}>Trending</Tab>
+          <Tab active={feedTab === 'following'} onClick={() => setFeedTab('following')}>Following</Tab>
+        </TabsContainer>
+
+        {feedTab === 'following' && (
+          <div style={{ background: 'white', border: '1px solid #E1E8ED', borderRadius: '12px', padding: '40px 20px', marginBottom: '20px', textAlign: 'center', color: '#657786' }}>
+            <p style={{ fontWeight: 600, marginBottom: 8 }}>Follow topics and people</p>
+            <p style={{ fontSize: 14 }}>Your following feed will show news from topics and users you follow.</p>
+          </div>
+        )}
+
+        <NewsForm onNewsCreated={handleNewsCreated} />
 
         <SearchContainer>
           <SearchInput
@@ -196,12 +246,17 @@ const Home = () => {
           </div>
         ) : (
           news.map((item) => (
-            <TweetCard
+            <NewsCard
               key={item.id}
-              tweet={item}
+              newsItem={item}
               onUpdate={fetchNews}
             />
           ))
+        )}
+        {hasMore && news.length > 0 && (
+          <LoadMoreButton onClick={() => fetchNews(true)} disabled={loadingMore}>
+            {loadingMore ? 'Loading...' : 'Load More'}
+          </LoadMoreButton>
         )}
       </MainContent>
 
@@ -209,7 +264,7 @@ const Home = () => {
         {user?.is_staff && (
           <div style={{ marginBottom: '20px' }}>
             <a
-              href="http://localhost:8001/admin/"
+              href="http://localhost:8000/admin/"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -230,7 +285,7 @@ const Home = () => {
           </div>
         )}
         <TopicsContainer>
-          <TopicsTitle>Political Topics</TopicsTitle>
+          <TopicsTitle>Trending Topics</TopicsTitle>
           <TopicItem
             active={!selectedTopic}
             onClick={() => handleTopicFilter('')}
@@ -245,13 +300,13 @@ const Home = () => {
               onClick={() => handleTopicFilter(topic.id.toString())}
             >
               <TopicName>{topic.name}</TopicName>
-              <TopicCount>{topic.news_count || topic.tweet_count} news posts</TopicCount>
+              <TopicCount>{topic.news_count} news posts</TopicCount>
             </TopicItem>
           ))}
         </TopicsContainer>
       </Sidebar>
-    </HomeContainer>
+    </FeedContainer>
   );
 };
 
-export default Home;
+export default Feed;

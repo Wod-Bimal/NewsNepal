@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tweet, Topic, Comment
+from .models import News, Topic, Comment
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
@@ -9,8 +9,8 @@ class TopicAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
     ordering = ['name']
 
-@admin.register(Tweet)
-class TweetAdmin(admin.ModelAdmin):
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
     """Admin for news post model."""
     list_display = ['author', 'title', 'topic', 'like_count', 'share_count', 'created_at']
     list_filter = ['topic', 'status', 'created_at']
@@ -26,9 +26,9 @@ class TweetAdmin(admin.ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     """Admin for Comment model."""
-    list_display = ['author', 'tweet', 'content_preview', 'like_count', 'created_at']
+    list_display = ['author', 'news', 'content_preview', 'like_count', 'created_at']
     list_filter = ['created_at']
-    search_fields = ['content', 'author__username', 'tweet__content']
+    search_fields = ['content', 'author__username', 'news__content']
     ordering = ['-created_at']
     readonly_fields = ['like_count', 'created_at', 'updated_at']
     

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 
 const LoginContainer = styled.div`
@@ -106,6 +107,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
+  const { showSuccess } = useNotification();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -123,7 +125,8 @@ const Login = () => {
     const result = await login(formData);
     
     if (result.success) {
-      navigate('/');
+      showSuccess('Welcome back!');
+      navigate('/feed');
     } else {
       setError(result.error?.error || 'Login failed. Please try again.');
     }

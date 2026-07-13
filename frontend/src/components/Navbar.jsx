@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
@@ -83,22 +84,31 @@ const Username = styled.span`
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { showSuccess } = useNotification();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLanding = location.pathname === '/';
 
   const handleLogout = async () => {
     await logout();
+    showSuccess('Logged out');
     navigate('/');
   };
 
   return (
     <Nav>
       <NavContainer>
-        <Logo to="/">NewsNepal</Logo>
+        <Logo to={isAuthenticated ? "/feed" : "/"}>NewsNepal</Logo>
         
         <NavLinks>
-          {isAuthenticated ? (
+          {isLanding && !isAuthenticated ? (
             <>
-              <NavLink to="/">Home</NavLink>
+              <NavLink to="/login">Login</NavLink>
+              <Button primary as={Link} to="/register">Sign Up</Button>
+            </>
+          ) : isAuthenticated ? (
+            <>
+              <NavLink to="/feed">Feed</NavLink>
               <NavLink to="/profile">Profile</NavLink>
               <UserInfo>
                 {user?.profile_picture && (
@@ -113,8 +123,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <NavLink to="/">Home</NavLink>
-              <Button as={Link} to="/login">Login</Button>
+              <NavLink to="/login">Login</NavLink>
               <Button primary as={Link} to="/register">Sign Up</Button>
             </>
           )}

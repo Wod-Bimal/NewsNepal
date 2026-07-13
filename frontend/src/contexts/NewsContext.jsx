@@ -88,20 +88,20 @@ export const NewsProvider = ({ children }) => {
   }, []);
 
   const value = {
-    tweets,
+    news,
     loading,
     error,
-    fetchTweets,
-    createTweet,
-    deleteTweet,
-    likeTweet,
-    retweet,
+    fetchNews,
+    createNews,
+    deleteNews,
+    likeNews,
+    shareNews,
     clearError,
   };
 
   return (
-    <TweetContext.Provider value={value}>
+    <NewsContext.Provider value={value}>
       {children}
-    </TweetContext.Provider>
+    </NewsContext.Provider>
   );
 };

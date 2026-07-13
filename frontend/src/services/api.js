@@ -91,9 +91,10 @@ export const topicService = {
 
 // Comment services
 export const commentService = {
-  createComment: (tweetId, commentData) => 
-    api.post(API_ENDPOINTS.COMMENTS.CREATE(tweetId), commentData),
+  createComment: (newsId, commentData) => 
+    api.post(API_ENDPOINTS.COMMENTS.CREATE(newsId), commentData),
   likeComment: (id) => api.post(API_ENDPOINTS.COMMENTS.LIKE(id)),
+  deleteComment: (id) => api.delete(`/api/comments/${id}/delete/`),
 };
 
 export default api;
