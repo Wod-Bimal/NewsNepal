@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import { newsService, commentService } from '../services/api.js';
 import styled from 'styled-components';
-import { FaHeart, FaRetweet, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
+import { FaHeart, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
+import { BIAS_CONFIG } from '../utils/constants.js';
 
 const Container = styled.div`max-width: 700px; margin: 0 auto; padding: 20px;`;
 
@@ -87,12 +88,6 @@ const NewsDetail = () => {
     catch {}
   };
 
-  const handleShare = async () => {
-    if (!isAuthenticated) return;
-    try { const res = await newsService.shareNews(news.id); setNews({ ...news, is_shared: res.data.shared, share_count: res.data.share_count }); }
-    catch {}
-  };
-
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentText.trim() || submitting) return;
@@ -109,7 +104,7 @@ const NewsDetail = () => {
   const handleCommentLike = async (commentId) => {
     if (!isAuthenticated) return;
     try {
-      const res = await commentService.likeComment(commentId);
+      const res = await commentService.likeComment(news.id, commentId);
       setComments(prev => prev.map(c =>
         c.id === commentId ? { ...c, is_liked: res.data.liked, like_count: res.data.like_count } : c
       ));
@@ -130,6 +125,14 @@ const NewsDetail = () => {
           <div>
             <div style={{ fontWeight: 600, color: '#14171A' }}>{news.author.username}</div>
             {news.topic && <span style={{ background: news.topic.color, color: 'white', padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600 }}>{news.topic.name}</span>}
+            {news.source && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: (BIAS_CONFIG[news.source.bias_rating] || {}).color || '#9CA3AF' }} />
+                <a href={news.source.website_url} target="_blank" rel="noopener noreferrer" style={{ color: '#657786', fontSize: 13, textDecoration: 'none' }}>
+                  {news.source.name} ({news.source.bias_label})
+                </a>
+              </div>
+            )}
           </div>
         </Header>
         {news.title && <Title>{news.title}</Title>}
@@ -140,7 +143,6 @@ const NewsDetail = () => {
 
         <Actions>
           <ActionBtn active={news.is_liked} onClick={handleLike}><FaHeart /> {news.like_count}</ActionBtn>
-          <ActionBtn active={news.is_shared} onClick={handleShare}><FaRetweet /> {news.share_count}</ActionBtn>
         </Actions>
 
         <SectionTitle>Comments ({comments.length})</SectionTitle>

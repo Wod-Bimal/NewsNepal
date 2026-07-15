@@ -11,18 +11,24 @@ export const API_ENDPOINTS = {
   },
   NEWS: {
     LIST: '/api/news/',
-    CREATE: '/api/news/create/',
     DETAIL: (id) => `/api/news/${id}/`,
-    DELETE: (id) => `/api/news/${id}/delete/`,
     LIKE: (id) => `/api/news/${id}/like/`,
-    SHARE: (id) => `/api/news/${id}/share/`,
   },
   TOPICS: {
     LIST: '/api/topics/',
   },
+  SOURCES: {
+    LIST: '/api/sources/',
+    DETAIL: (id) => `/api/sources/${id}/`,
+  },
   COMMENTS: {
-    CREATE: (newsId) => `/api/comments/create/${newsId}/`,
-    LIKE: (id) => `/api/comments/${id}/like/`,
+    LIST: (newsId) => `/api/news/${newsId}/comments/`,
+    CREATE: (newsId) => `/api/news/${newsId}/comments/`,
+    LIKE: (newsId, id) => `/api/news/${newsId}/comments/${id}/like/`,
+    DELETE: (newsId, id) => `/api/news/${newsId}/comments/${id}/`,
+  },
+  BIAS: {
+    VOTE: (newsId) => `/api/news/${newsId}/bias/`,
   },
 };
 
@@ -46,6 +52,16 @@ export const COLORS = {
   TEXT_SECONDARY: '#657786',
   BACKGROUND: '#F7F9FA',
   WHITE: '#FFFFFF',
+};
+
+export const BIAS_CONFIG = {
+  center: { label: 'Centrist', color: '#059669' },
+  left: { label: 'Leaning Left', color: '#2563EB' },
+  right: { label: 'Leaning Right', color: '#DC2626' },
+  left_extreme: { label: 'Far Left', color: '#1E3A5F' },
+  right_extreme: { label: 'Far Right', color: '#7F1D1D' },
+  sensationalist: { label: 'Sensationalist', color: '#D97706' },
+  unknown: { label: 'Unknown', color: '#9CA3AF' },
 };
 
 export const BREAKPOINTS = {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
-import { newsService, topicService } from '../services/api.js';
+import { newsService, topicService, sourceService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaImage, FaTimes } from 'react-icons/fa';
 
@@ -147,17 +147,29 @@ const NewsForm = ({ onNewsCreated }) => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [selectedSource, setSelectedSource] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [topics, setTopics] = useState([]);
+  const [sources, setSources] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
     fetchTopics();
+    fetchSources();
   }, []);
 
   const fetchTopics = async () => {
     try {
       const response = await topicService.getTopics();
       setTopics(response.data);
+    } catch {
+    }
+  };
+
+  const fetchSources = async () => {
+    try {
+      const response = await sourceService.getSources();
+      setSources(response.data);
     } catch {
     }
   };
@@ -188,12 +200,16 @@ const NewsForm = ({ onNewsCreated }) => {
         content,
         image,
         topic: selectedTopic || undefined,
+        source_id: selectedSource || undefined,
+        source_url: sourceUrl || undefined,
       });
       
       setContent('');
       setImage(null);
       setImagePreview(null);
       setSelectedTopic('');
+      setSelectedSource('');
+      setSourceUrl('');
       showSuccess('News posted!');
       
       if (onNewsCreated) {
@@ -232,6 +248,29 @@ const NewsForm = ({ onNewsCreated }) => {
             </option>
           ))}
         </TopicSelect>
+
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <TopicSelect
+            value={selectedSource}
+            onChange={(e) => setSelectedSource(e.target.value)}
+            style={{ flex: 1 }}
+          >
+            <option value="">Select source (optional)</option>
+            {sources.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </TopicSelect>
+          <input
+            type="url"
+            placeholder="Source URL (optional)"
+            value={sourceUrl}
+            onChange={(e) => setSourceUrl(e.target.value)}
+            style={{
+              flex: 1, border: '1px solid #E1E8ED', borderRadius: 8, padding: '8px 12px',
+              fontSize: 14, outline: 'none',
+            }}
+          />
+        </div>
 
         <TextArea
           value={content}

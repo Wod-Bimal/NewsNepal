@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
 import NewsForm from '../components/NewsForm.jsx';
 import NewsCard from '../components/NewsCard.jsx';
-import { newsService, topicService } from '../services/api.js';
+import { newsService, topicService, sourceService } from '../services/api.js';
+import { BIAS_CONFIG } from '../utils/constants.js';
 
 const TabsContainer = styled.div`
   display: flex;
@@ -144,6 +145,8 @@ const Feed = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [biasFilter, setBiasFilter] = useState('all');
+  const [sources, setSources] = useState([]);
   const [feedTab, setFeedTab] = useState('for-you');
   const nextPageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
@@ -154,6 +157,7 @@ const Feed = () => {
       const params = { page: append ? nextPageRef.current + 1 : 1 };
       if (selectedTopic) params.topic = selectedTopic;
       if (searchQuery) params.search = searchQuery;
+      if (biasFilter !== 'all') params.bias = biasFilter;
 
       const response = await newsService.getNews(params);
       const data = response.data.results || response.data;
@@ -167,7 +171,7 @@ const Feed = () => {
     } finally {
       setLoading(false); setLoadingMore(false);
     }
-  }, [selectedTopic, searchQuery]);
+  }, [selectedTopic, searchQuery, biasFilter]);
 
   const fetchTopics = useCallback(async () => {
     try {
@@ -178,10 +182,18 @@ const Feed = () => {
     }
   }, []);
 
+  const fetchSources = useCallback(async () => {
+    try {
+      const response = await sourceService.getSources();
+      setSources(response.data);
+    } catch {}
+  }, []);
+
   useEffect(() => {
     fetchNews();
     fetchTopics();
-  }, [fetchNews, fetchTopics]);
+    fetchSources();
+  }, [fetchNews, fetchTopics, fetchSources]);
 
   const handleNewsCreated = () => {
     fetchNews();
@@ -304,6 +316,37 @@ const Feed = () => {
             </TopicItem>
           ))}
         </TopicsContainer>
+
+        <TopicsContainer style={{ marginTop: 20 }}>
+          <TopicsTitle>Filter by Bias</TopicsTitle>
+          <TopicItem active={biasFilter === 'all'} onClick={() => setBiasFilter('all')}>
+            <TopicName>All Sources</TopicName>
+          </TopicItem>
+          {Object.entries(BIAS_CONFIG).map(([key, cfg]) => (
+            <TopicItem
+              key={key}
+              active={biasFilter === key}
+              onClick={() => setBiasFilter(key)}
+            >
+              <TopicName>
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: cfg.color, marginRight: 8 }} />
+                {cfg.label}
+              </TopicName>
+            </TopicItem>
+          ))}
+        </TopicsContainer>
+
+        {sources.length > 0 && (
+          <TopicsContainer style={{ marginTop: 20 }}>
+            <TopicsTitle>Sources</TopicsTitle>
+            {sources.map(s => (
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderBottom: '1px solid #F7F9FA', fontSize: 13 }}>
+                <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: (BIAS_CONFIG[s.bias_rating] || {}).color || '#9CA3AF' }} />
+                {s.name}
+              </div>
+            ))}
+          </TopicsContainer>
+        )}
       </Sidebar>
     </FeedContainer>
   );

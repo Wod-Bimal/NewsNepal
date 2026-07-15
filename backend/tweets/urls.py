@@ -1,21 +1,20 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
-app_name = 'news'
+router = DefaultRouter()
+router.register(r'topics', views.TopicViewSet, basename='topic')
+router.register(r'news', views.NewsViewSet, basename='news')
+router.register(r'news/(?P<news_pk>[^/.]+)/comments', views.CommentViewSet, basename='comment')
+router.register(r'sources', views.NewsSourceViewSet, basename='source')
 
 urlpatterns = [
-    path('news/', views.news_list, name='news_list'),
-    path('news/create/', views.news_create, name='news_create'),
-    path('news/user/<str:username>/', views.user_news, name='user_news'),
-    path('news/<int:pk>/', views.news_detail, name='news_detail'),
-    path('news/<int:pk>/update/', views.news_update, name='news_update'),
-    path('news/<int:pk>/delete/', views.news_delete, name='news_delete'),
-    path('news/<int:pk>/like/', views.news_like, name='news_like'),
-    path('news/<int:pk>/share/', views.news_share, name='news_share'),
-    path('comments/create/<int:news_pk>/', views.comment_create, name='comment_create'),
-    path('comments/<int:pk>/like/', views.comment_like, name='comment_like'),
-    path('comments/<int:pk>/delete/', views.comment_delete, name='comment_delete'),
-    path('topics/', views.TopicViewSet.as_view({'get': 'list', 'post': 'create'}), name='topic_list'),
-    path('topics/<int:pk>/', views.TopicViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='topic_detail'),
-    path('topics/<int:pk>/news/', views.topic_news, name='topic_news'),
+    path('', include(router.urls)),
+    path('register/', views.RegisterView.as_view(), name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('me/', views.me_view, name='me'),
+    path('news/<int:pk>/like/', views.toggle_like, name='news-like'),
+    path('news/<int:news_pk>/comments/<int:pk>/like/', views.toggle_comment_like, name='comment-like'),
+    path('news/<int:news_id>/bias/', views.bias_vote, name='bias-vote'),
 ]

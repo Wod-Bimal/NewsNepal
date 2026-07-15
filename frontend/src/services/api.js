@@ -74,14 +74,13 @@ export const newsService = {
         formData.append(key, value);
       }
     });
-    return api.post(API_ENDPOINTS.NEWS.CREATE, formData, {
+    return api.post(API_ENDPOINTS.NEWS.LIST, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
   getNewsItem: (id) => api.get(API_ENDPOINTS.NEWS.DETAIL(id)),
-  deleteNews: (id) => api.delete(API_ENDPOINTS.NEWS.DELETE(id)),
+  deleteNews: (id) => api.delete(API_ENDPOINTS.NEWS.DETAIL(id)),
   likeNews: (id) => api.post(API_ENDPOINTS.NEWS.LIKE(id)),
-  shareNews: (id) => api.post(API_ENDPOINTS.NEWS.SHARE(id)),
 };
 
 // Topic services
@@ -89,12 +88,25 @@ export const topicService = {
   getTopics: () => api.get(API_ENDPOINTS.TOPICS.LIST),
 };
 
+// Source services
+export const sourceService = {
+  getSources: () => api.get(API_ENDPOINTS.SOURCES.LIST),
+  getSource: (id) => api.get(API_ENDPOINTS.SOURCES.DETAIL(id)),
+};
+
+// Bias vote services
+export const biasVoteService = {
+  vote: (newsId, rating) => api.post(API_ENDPOINTS.BIAS.VOTE(newsId), { rating }),
+  removeVote: (newsId) => api.delete(API_ENDPOINTS.BIAS.VOTE(newsId)),
+};
+
 // Comment services
 export const commentService = {
+  getComments: (newsId) => api.get(API_ENDPOINTS.COMMENTS.LIST(newsId)),
   createComment: (newsId, commentData) => 
     api.post(API_ENDPOINTS.COMMENTS.CREATE(newsId), commentData),
-  likeComment: (id) => api.post(API_ENDPOINTS.COMMENTS.LIKE(id)),
-  deleteComment: (id) => api.delete(`/api/comments/${id}/delete/`),
+  likeComment: (newsId, id) => api.post(API_ENDPOINTS.COMMENTS.LIKE(newsId, id)),
+  deleteComment: (newsId, id) => api.delete(API_ENDPOINTS.COMMENTS.DELETE(newsId, id)),
 };
 
 export default api;
