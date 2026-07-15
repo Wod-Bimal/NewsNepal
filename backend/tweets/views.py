@@ -1,218 +1,170 @@
-from rest_framework import status, filters
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework import viewsets, permissions, generics, status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from django.db.models import Q
-from .models import News, Topic, Comment
-from .serializers import NewsSerializer, NewsCreateSerializer, TopicSerializer, CommentSerializer
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
+from django.db.models import Count, Q
+from .models import News, Topic, Comment, NewsSource, BiasVote
+from .serializers import (
+    UserSerializer, RegisterSerializer, TopicSerializer,
+    NewsSerializer, CommentSerializer, NewsSourceSerializer,
+    NewsSourceDetailSerializer, BiasVoteSerializer
+)
 
 User = get_user_model()
 
+
+def safe_user(request):
+    return request.user if request.user.is_authenticated else None
+
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        login(self.request, user)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    if user:
+        login(request, user)
+        return Response(UserSerializer(user).data)
+    return Response({'error': 'Invalid credentials'}, status=400)
+
+
+@api_view(['POST'])
+def logout_view(request):
+    logout(request)
+    return Response({'message': 'Logged out'})
+
+
 @api_view(['GET'])
-@permission_classes([AllowAny])
-def user_news(request, username):
-    """Get all news posts by a specific user."""
-    user = get_object_or_404(User, username=username)
-    news_items = News.objects.filter(author=user).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
-    serializer = NewsSerializer(news_items, many=True, context={'request': request})
-    return Response(serializer.data)
+def me_view(request):
+    if request.user.is_authenticated:
+        return Response(UserSerializer(request.user).data)
+    return Response({'error': 'Not logged in'}, status=401)
 
 
-class TopicViewSet(ModelViewSet):
-    """ViewSet for managing topics."""
+class TopicViewSet(viewsets.ModelViewSet):
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
-    pagination_class = None
-    
+    permission_classes = [permissions.AllowAny]
+
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAdminUser]
-        return [permission() for permission in permission_classes]
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def topic_news(request, pk):
-    """Get news posts for a specific topic."""
-    news_items = News.objects.filter(topic_id=pk).select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
-    serializer = NewsSerializer(news_items, many=True, context={'request': request})
-    return Response(serializer.data)
+class NewsViewSet(viewsets.ModelViewSet):
+    serializer_class = NewsSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        qs = News.objects.filter(status='published').select_related('author', 'topic', 'source')
+        qs = qs.prefetch_related('comments__author', 'likes', 'bias_votes')
+
+        topic = self.request.query_params.get('topic')
+        if topic: qs = qs.filter(topic__name__iexact=topic)
+
+        search = self.request.query_params.get('search')
+        if search: qs = qs.filter(Q(title__icontains=search) | Q(content__icontains=search))
+
+        source = self.request.query_params.get('source')
+        if source: qs = qs.filter(source_id=source)
+
+        bias = self.request.query_params.get('bias')
+        if bias and bias != 'all':
+            qs = qs.filter(source__bias_rating=bias)
+
+        sort = self.request.query_params.get('sort', '-created_at')
+        if sort == 'most_liked': qs = qs.annotate(lcount=Count('likes')).order_by('-lcount')
+        elif sort == 'most_commented': qs = qs.annotate(ccount=Count('comments')).order_by('-ccount')
+        else: qs = qs.order_by(sort)
+
+        return qs
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def news_list(request):
-    """Get list of news posts with optional filtering."""
-    queryset = News.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments')
-    
-    topic_id = request.GET.get('topic')
-    if topic_id:
-        queryset = queryset.filter(topic_id=topic_id)
-    
-    search = request.GET.get('search')
-    if search:
-        queryset = queryset.filter(
-            Q(title__icontains=search) |
-            Q(summary__icontains=search) |
-            Q(content__icontains=search) |
-            Q(author__username__icontains=search) |
-            Q(author__first_name__icontains=search) |
-            Q(author__last_name__icontains=search)
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        return Comment.objects.filter(news_id=self.kwargs.get('news_pk')).select_related('author')
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, news_id=self.kwargs.get('news_pk'))
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+
+class NewsSourceViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = NewsSource.objects.filter(is_active=True)
+    permission_classes = [permissions.AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return NewsSourceDetailSerializer
+        return NewsSourceSerializer
+
+
+@api_view(['POST', 'DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def bias_vote(request, news_id):
+    try:
+        news = News.objects.get(id=news_id)
+    except News.DoesNotExist:
+        return Response({'error': 'News not found'}, status=404)
+
+    if request.method == 'POST':
+        rating = request.data.get('rating')
+        if rating not in dict(BiasVote._meta.get_field('rating').choices):
+            return Response({'error': 'Invalid rating'}, status=400)
+        vote, created = BiasVote.objects.update_or_create(
+            news=news, user=request.user, defaults={'rating': rating}
         )
-    
-    serializer = NewsSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
+        return Response(BiasVoteSerializer(vote).data, status=201 if created else 200)
+
+    elif request.method == 'DELETE':
+        BiasVote.objects.filter(news=news, user=request.user).delete()
+        return Response(status=204)
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def news_create(request):
-    """Create a new news post."""
-    serializer = NewsCreateSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        news_item = serializer.save()
-        response_serializer = NewsSerializer(news_item, context={'request': request})
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['PUT', 'PATCH'])
-@permission_classes([IsAuthenticated])
-def news_update(request, pk):
-    """Update a news post."""
-    try:
-        news_item = News.objects.get(pk=pk)
-        if news_item.author != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        
-        serializer = NewsCreateSerializer(news_item, data=request.data, partial=True, context={'request': request})
-        if serializer.is_valid():
-            updated_news = serializer.save()
-            return Response(NewsSerializer(updated_news, context={'request': request}).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def news_detail(request, pk):
-    """Get a specific news post."""
-    try:
-        news_item = News.objects.select_related('author', 'topic').prefetch_related('likes', 'shares', 'comments').get(pk=pk)
-        serializer = NewsSerializer(news_item, context={'request': request})
-        return Response(serializer.data)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def news_delete(request, pk):
-    """Delete a news post (only by author)."""
-    try:
-        news_item = News.objects.get(pk=pk)
-        if news_item.author != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        news_item.delete()
-        return Response({'message': 'News post deleted successfully'}, status=status.HTTP_200_OK)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
+@permission_classes([permissions.IsAuthenticated])
+def toggle_like(request, pk):
+    news = generics.get_object_or_404(News, pk=pk)
+    if news.likes.filter(id=request.user.id).exists():
+        news.likes.remove(request.user)
+        return Response({'liked': False, 'count': news.like_count})
+    news.likes.add(request.user)
+    return Response({'liked': True, 'count': news.like_count})
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def news_like(request, pk):
-    """Like or unlike a news post."""
-    try:
-        news_item = News.objects.get(pk=pk)
-        if news_item.likes.filter(id=request.user.id).exists():
-            news_item.likes.remove(request.user)
-            liked = False
-        else:
-            news_item.likes.add(request.user)
-            liked = True
-        
-        return Response({
-            'liked': liked,
-            'like_count': news_item.like_count
-        }, status=status.HTTP_200_OK)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def news_share(request, pk):
-    """Share or unshare a news post."""
-    try:
-        news_item = News.objects.get(pk=pk)
-        if news_item.shares.filter(id=request.user.id).exists():
-            news_item.shares.remove(request.user)
-            shared = False
-        else:
-            news_item.shares.add(request.user)
-            shared = True
-        
-        return Response({
-            'shared': shared,
-            'share_count': news_item.share_count
-        }, status=status.HTTP_200_OK)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def comment_create(request, news_pk):
-    """Create a comment on a news post."""
-    try:
-        news_item = News.objects.get(pk=news_pk)
-        serializer = CommentSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            comment = serializer.save(news=news_item, author=request.user)
-            return Response(CommentSerializer(comment, context={'request': request}).data, 
-                          status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    except News.DoesNotExist:
-        return Response({'error': 'News post not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def comment_like(request, pk):
-    """Like or unlike a comment."""
-    try:
-        comment = Comment.objects.get(pk=pk)
-        if comment.likes.filter(id=request.user.id).exists():
-            comment.likes.remove(request.user)
-            liked = False
-        else:
-            comment.likes.add(request.user)
-            liked = True
-        
-        return Response({
-            'liked': liked,
-            'like_count': comment.like_count
-        }, status=status.HTTP_200_OK)
-    except Comment.DoesNotExist:
-        return Response({'error': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def comment_delete(request, pk):
-    """Delete a comment (only by author)."""
-    try:
-        comment = Comment.objects.get(pk=pk)
-        if comment.author != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        comment.delete()
-        return Response({'message': 'Comment deleted successfully'}, status=status.HTTP_200_OK)
-    except Comment.DoesNotExist:
-        return Response({'error': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
+@permission_classes([permissions.IsAuthenticated])
+def toggle_comment_like(request, news_pk, pk):
+    comment = generics.get_object_or_404(Comment, pk=pk)
+    if comment.likes.filter(id=request.user.id).exists():
+        comment.likes.remove(request.user)
+        return Response({'liked': False, 'count': comment.like_count})
+    comment.likes.add(request.user)
+    return Response({'liked': True, 'count': comment.like_count})

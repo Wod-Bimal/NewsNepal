@@ -1,41 +1,74 @@
 from rest_framework import serializers
-from accounts.models import User
-from .models import News, Topic, Comment
+from .models import News, Topic, Comment, NewsSource, BiasVote
+from django.contrib.auth import get_user_model
 
-
-class TopicSerializer(serializers.ModelSerializer):
-    """Serializer for Topic model."""
-    news_count = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Topic
-        fields = ['id', 'name', 'description', 'color', 'created_at', 'news_count']
-        read_only_fields = ['id', 'created_at']
-    
-    def get_news_count(self, obj):
-        return obj.news.count()
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Simplified user serializer for news posts."""
-    
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'profile_picture']
+        fields = ('id', 'username', 'email', 'bio', 'avatar', 'date_joined')
+        read_only_fields = ('id', 'date_joined')
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'password')
+
+    def create(self, data):
+        return User.objects.create_user(**data)
+
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = '__all__'
+
+
+class NewsSourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsSource
+        fields = ('id', 'name', 'website_url', 'logo', 'bias_rating', 'credibility_score', 'country', 'description', 'is_active')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['bias_label'] = instance.get_bias_rating_display()
+        return data
+
+
+class NewsSourceDetailSerializer(serializers.ModelSerializer):
+    bias_distribution = serializers.SerializerMethodField()
+
+    class Meta:
+        model = NewsSource
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['bias_label'] = instance.get_bias_rating_display()
+        return data
+
+    def get_bias_distribution(self, obj):
+        from django.db.models import Count
+        votes = BiasVote.objects.filter(news__source=obj).values('rating').annotate(count=Count('id'))
+        return {v['rating']: v['count'] for v in votes}
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Serializer for Comment model."""
     author = UserSerializer(read_only=True)
     like_count = serializers.ReadOnlyField()
-    is_liked = serializers.SerializerMethodField()
-    
+    has_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'content', 'created_at', 'like_count', 'is_liked']
-        read_only_fields = ['id', 'created_at']
-    
-    def get_is_liked(self, obj):
+        fields = ('id', 'news', 'author', 'content', 'created_at', 'updated_at', 'like_count', 'has_liked')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def get_has_liked(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.likes.filter(id=request.user.id).exists()
@@ -43,47 +76,45 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class NewsSerializer(serializers.ModelSerializer):
-    """Serializer for News model."""
     author = UserSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
+    topic_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    comments = CommentSerializer(many=True, read_only=True)
     like_count = serializers.ReadOnlyField()
     share_count = serializers.ReadOnlyField()
-    comment_count = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
-    is_shared = serializers.SerializerMethodField()
-    comments = CommentSerializer(many=True, read_only=True)
-    
+    has_liked = serializers.SerializerMethodField()
+    bias_summary = serializers.ReadOnlyField()
+    source = NewsSourceSerializer(read_only=True)
+    source_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = News
-        fields = ['id', 'author', 'title', 'summary', 'content', 'topic', 'source_url', 'image',
-                 'published_at', 'status', 'created_at', 'updated_at',
-                 'like_count', 'share_count', 'comment_count',
-                 'is_liked', 'is_shared', 'comments']
-        read_only_fields = ['id', 'published_at', 'created_at', 'updated_at']
-    
-    def get_comment_count(self, obj):
-        return obj.comments.count()
-    
-    def get_is_liked(self, obj):
+        fields = ('id', 'author', 'title', 'summary', 'content', 'topic', 'topic_id',
+                  'source', 'source_id', 'source_url', 'image', 'published_at', 'status',
+                  'created_at', 'updated_at', 'like_count', 'share_count', 'has_liked', 'comments',
+                  'bias_summary')
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def get_has_liked(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.likes.filter(id=request.user.id).exists()
         return False
-    
-    def get_is_shared(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.shares.filter(id=request.user.id).exists()
-        return False
+
+    def create(self, data):
+        data['author'] = self.context['request'].user
+        return super().create(data)
 
 
-class NewsCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating news posts."""
-    
+class BiasVoteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = News
-        fields = ['title', 'summary', 'content', 'topic', 'source_url', 'image', 'published_at', 'status']
-    
-    def create(self, validated_data):
-        validated_data['author'] = self.context['request'].user
-        return super().create(validated_data)
+        model = BiasVote
+        fields = ('id', 'news', 'rating', 'created_at')
+        read_only_fields = ('id', 'created_at')
+
+    def create(self, data):
+        data['user'] = self.context['request'].user
+        vote, created = BiasVote.objects.update_or_create(
+            news=data['news'], user=data['user'], defaults={'rating': data['rating']}
+        )
+        return vote
