@@ -161,7 +161,7 @@ const NewsForm = ({ onNewsCreated }) => {
   const fetchTopics = async () => {
     try {
       const response = await topicService.getTopics();
-      setTopics(response.data);
+      setTopics(response.data.results || response.data);
     } catch {
     }
   };
@@ -169,7 +169,7 @@ const NewsForm = ({ onNewsCreated }) => {
   const fetchSources = async () => {
     try {
       const response = await sourceService.getSources();
-      setSources(response.data);
+      setSources(response.data.results || response.data);
     } catch {
     }
   };

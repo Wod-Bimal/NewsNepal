@@ -91,8 +91,8 @@ const TopicItem = styled.button`
   width: 100%;
   padding: 12px;
   margin-bottom: 8px;
-  background: ${props => props.active ? '#1DA1F2' : '#F7F9FA'};
-  color: ${props => props.active ? 'white' : '#14171A'};
+  background: ${props => props.$active ? '#1DA1F2' : '#F7F9FA'};
+  color: ${props => props.$active ? 'white' : '#14171A'};
   border: none;
   border-radius: 8px;
   text-align: left;
@@ -100,7 +100,7 @@ const TopicItem = styled.button`
   transition: all 0.3s ease;
 
   &:hover {
-    background: ${props => props.active ? '#1991DB' : '#E1E8ED'};
+    background: ${props => props.$active ? '#1991DB' : '#E1E8ED'};
   }
 `;
 
@@ -176,7 +176,7 @@ const Feed = () => {
   const fetchTopics = useCallback(async () => {
     try {
       const response = await topicService.getTopics();
-      setTopics(response.data);
+      setTopics(response.data.results || response.data);
     } catch {
       // Topics sidebar is non-critical; fail silently
     }
@@ -185,7 +185,7 @@ const Feed = () => {
   const fetchSources = useCallback(async () => {
     try {
       const response = await sourceService.getSources();
-      setSources(response.data);
+      setSources(response.data.results || response.data);
     } catch {}
   }, []);
 
@@ -299,7 +299,7 @@ const Feed = () => {
         <TopicsContainer>
           <TopicsTitle>Trending Topics</TopicsTitle>
           <TopicItem
-            active={!selectedTopic}
+            $active={!selectedTopic}
             onClick={() => handleTopicFilter('')}
           >
             <TopicName>All Topics</TopicName>
@@ -308,7 +308,7 @@ const Feed = () => {
           {topics.map(topic => (
             <TopicItem
               key={topic.id}
-              active={selectedTopic === topic.id.toString()}
+              $active={selectedTopic === topic.id.toString()}
               onClick={() => handleTopicFilter(topic.id.toString())}
             >
               <TopicName>{topic.name}</TopicName>
@@ -319,13 +319,13 @@ const Feed = () => {
 
         <TopicsContainer style={{ marginTop: 20 }}>
           <TopicsTitle>Filter by Bias</TopicsTitle>
-          <TopicItem active={biasFilter === 'all'} onClick={() => setBiasFilter('all')}>
+          <TopicItem $active={biasFilter === 'all'} onClick={() => setBiasFilter('all')}>
             <TopicName>All Sources</TopicName>
           </TopicItem>
           {Object.entries(BIAS_CONFIG).map(([key, cfg]) => (
             <TopicItem
               key={key}
-              active={biasFilter === key}
+              $active={biasFilter === key}
               onClick={() => setBiasFilter(key)}
             >
               <TopicName>
