@@ -59,6 +59,16 @@ export const authService = {
   logout: () => api.post(API_ENDPOINTS.AUTH.LOGOUT),
   getProfile: () => api.get(API_ENDPOINTS.AUTH.PROFILE),
   updateProfile: (profileData) => api.put(API_ENDPOINTS.AUTH.UPDATE_PROFILE, profileData),
+  uploadPicture: (file) => {
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+    return api.post(API_ENDPOINTS.AUTH.UPLOAD_PICTURE, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getStats: () => api.get(API_ENDPOINTS.AUTH.STATS),
+  getLikedNews: () => api.get(API_ENDPOINTS.AUTH.LIKED_NEWS),
+  getMyComments: () => api.get(API_ENDPOINTS.AUTH.MY_COMMENTS),
 };
 
 // News services

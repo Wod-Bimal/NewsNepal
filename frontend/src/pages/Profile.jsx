@@ -1,147 +1,266 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
-import { newsService } from '../services/api.js';
+import { newsService, authService } from '../services/api.js';
 
-const ProfileContainer = styled.div`max-width: 800px; margin: 0 auto; padding: 20px;`;
+const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
 
-const ProfileHeader = styled.div`
-  background: white; border-radius: 12px; padding: 30px; margin-bottom: 20px;
-  border: 1px solid #E1E8ED; text-align: center;
+const Card = styled.div`
+  background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px;
+  border: 1px solid #E1E8ED;
 `;
+
+const ProfileTop = styled.div`
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+`;
+
+const AvatarWrap = styled.div`position: relative; flex-shrink: 0;`;
 
 const Avatar = styled.img`
   width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
-  margin-bottom: 20px; border: 4px solid #1DA1F2;
+  border: 4px solid #1DA1F2; cursor: pointer;
 `;
 
-const Username = styled.h1`color: #14171A; margin-bottom: 8px; font-size: 28px;`;
-const FullName = styled.h2`color: #657786; margin-bottom: 16px; font-size: 18px; font-weight: normal;`;
-const Bio = styled.p`color: #14171A; margin-bottom: 16px; line-height: 1.5;`;
-const Location = styled.div`color: #657786; margin-bottom: 20px;`;
-
-const StatsContainer = styled.div`display: flex; justify-content: center; gap: 40px;`;
-const Stat = styled.div`text-align: center;`;
-const StatNumber = styled.div`font-size: 24px; font-weight: bold; color: #14171A;`;
-const StatLabel = styled.div`color: #657786; font-size: 14px;`;
-
-const NewsContainer = styled.div`margin-top: 20px;`;
-const SectionTitle = styled.h3`color: #14171A; margin-bottom: 20px; font-size: 20px;`;
-
-const LoadingContainer = styled.div`text-align: center; padding: 40px; color: #657786;`;
-const ErrorContainer = styled.div`
-  background: #FDF2F8; color: #E0245E; padding: 16px; border-radius: 8px;
-  margin-bottom: 20px; border: 1px solid #FCE7F3;
+const AvatarOverlay = styled.div`
+  position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  opacity: ${p => p.$hover ? 1 : 0}; transition: opacity 0.2s; color: white; font-size: 13px;
+  cursor: pointer;
 `;
 
-const EditBtn = styled.button`
-  background: transparent; color: #1DA1F2; border: 1px solid #1DA1F2; padding: 8px 20px;
-  border-radius: 20px; font-weight: 600; cursor: pointer; margin-bottom: 16px;
-  &:hover { background: #F7F9FA; }
+const HiddenInput = styled.input`display: none;`;
+
+const Info = styled.div`flex: 1; min-width: 200px;`;
+
+const Username = styled.h1`color: #14171A; margin: 0 0 4px 0; font-size: 26px;`;
+const FullName = styled.h2`color: #657786; margin: 0 0 8px 0; font-size: 16px; font-weight: normal;`;
+const Bio = styled.p`color: #14171A; margin: 0 0 8px 0; line-height: 1.5; font-size: 14px;`;
+const LocationText = styled.div`color: #657786; font-size: 14px; margin-bottom: 4px;`;
+const JoinDate = styled.div`color: #9CA3AF; font-size: 13px;`;
+
+const StatsRow = styled.div`display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;`;
+const StatItem = styled.div`text-align: center;`;
+const StatNum = styled.span`font-weight: 700; font-size: 18px; color: #14171A;`;
+const StatLabel = styled.span`color: #657786; font-size: 13px; margin-left: 4px;`;
+
+const BtnRow = styled.div`display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;`;
+
+const Btn = styled.button`
+  padding: 8px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 14px;
+  border: 1px solid ${p => p.$primary ? '#1DA1F2' : '#E1E8ED'};
+  background: ${p => p.$primary ? '#1DA1F2' : 'transparent'};
+  color: ${p => p.$primary ? 'white' : p.$danger ? '#E0245E' : '#1DA1F2'};
+  &:hover { opacity: 0.85; }
 `;
 
-const EditForm = styled.form`display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;`;
+const Tabs = styled.div`display: flex; border-bottom: 1px solid #E1E8ED; margin-bottom: 16px; gap: 0;`;
+const Tab = styled.button`
+  flex: 1; padding: 12px; background: none; border: none; border-bottom: 3px solid
+  ${p => p.$active ? '#1DA1F2' : 'transparent'};
+  color: ${p => p.$active ? '#1DA1F2' : '#657786'};
+  font-weight: ${p => p.$active ? '700' : '500'}; cursor: pointer; font-size: 14px;
+  transition: all 0.2s;
+  &:hover { color: #1DA1F2; background: #F7F9FA; }
+`;
+
+const EditForm = styled.div`display: flex; flex-direction: column; gap: 12px;`;
+const FormRow = styled.div`display: flex; gap: 12px; flex-wrap: wrap;`;
 
 const Input = styled.input`
-  width: 100%; padding: 10px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 14px;
+  flex: 1; min-width: 150px; padding: 10px; border: 1px solid #E1E8ED; border-radius: 8px;
+  font-size: 14px;
   &:focus { outline: none; border-color: #1DA1F2; }
 `;
 
 const TextArea = styled.textarea`
-  width: 100%; padding: 10px; border: 1px solid #E1E8ED; border-radius: 8px; font-size: 14px;
-  resize: vertical; font-family: inherit; min-height: 60px;
+  width: 100%; padding: 10px; border: 1px solid #E1E8ED; border-radius: 8px;
+  font-size: 14px; resize: vertical; font-family: inherit; min-height: 60px;
   &:focus { outline: none; border-color: #1DA1F2; }
 `;
 
-const SaveBtn = styled.button`
-  background: #1DA1F2; color: white; border: none; padding: 10px; border-radius: 8px;
-  font-weight: 600; cursor: pointer; &:hover { background: #1991DB; }
-`;
-
-const CancelBtn = styled.button`
-  background: transparent; color: #657786; border: 1px solid #E1E8ED; padding: 10px; border-radius: 8px;
-  font-weight: 600; cursor: pointer; &:hover { background: #F7F9FA; }
-`;
+const Empty = styled.div`text-align: center; padding: 40px; color: #657786;`;
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
   const { showSuccess, showError } = useNotification();
-  const [userNews, setUserNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [hoverAvatar, setHoverAvatar] = useState(false);
+
+  const [tab, setTab] = useState('posts');
+  const [stats, setStats] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [likedNews, setLikedNews] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [loadingTab, setLoadingTab] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setForm({ first_name: user.first_name || '', last_name: user.last_name || '', bio: user.bio || '', location: user.location || '' });
+      setForm({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        bio: user.bio || '',
+        location: user.location || '',
+      });
     }
   }, [user]);
 
-  const fetchUserNews = useCallback(async () => {
-    if (!user) return;
+  const fetchStats = useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await newsService.getNews();
-      const filtered = response.data.results ? response.data.results.filter((item) => item.author.id === user.id) : response.data.filter((item) => item.author.id === user.id);
-      setUserNews(filtered);
-      setError(null);
-    } catch { setError('Failed to load your news posts. Please try again.'); }
-    finally { setLoading(false); }
+      const res = await authService.getStats();
+      setStats(res.data);
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchPosts = useCallback(async () => {
+    if (!user) return;
+    setLoadingTab(true);
+    try {
+      const res = await newsService.getNews();
+      const items = res.data.results || res.data;
+      setPosts(items.filter(n => n.author?.id === user.id));
+    } catch { /* ignore */ }
+    setLoadingTab(false);
   }, [user]);
 
-  useEffect(() => { fetchUserNews(); }, [fetchUserNews]);
+  const fetchLiked = useCallback(async () => {
+    setLoadingTab(true);
+    try {
+      const res = await authService.getLikedNews();
+      setLikedNews(res.data);
+    } catch { /* ignore */ }
+    setLoadingTab(false);
+  }, []);
+
+  const fetchComments = useCallback(async () => {
+    setLoadingTab(true);
+    try {
+      const res = await authService.getMyComments();
+      setComments(res.data);
+    } catch { /* ignore */ }
+    setLoadingTab(false);
+  }, []);
+
+  useEffect(() => { fetchStats(); fetchPosts(); }, [fetchStats, fetchPosts]);
+  useEffect(() => {
+    if (tab === 'liked') fetchLiked();
+    else if (tab === 'comments') fetchComments();
+  }, [tab, fetchLiked, fetchComments]);
+
+  const handleAvatarClick = () => fileInputRef.current?.click();
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await authService.uploadPicture(file);
+      showSuccess('Profile picture updated');
+      window.location.reload();
+    } catch {
+      showError('Failed to upload picture');
+    }
+  };
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSave = async (e) => {
     e.preventDefault();
     const res = await updateProfile(form);
-    if (res.success) { showSuccess('Profile updated'); setEditing(false); }
+    if (res.success) { showSuccess('Profile updated'); setEditing(false); fetchStats(); }
     else { showError('Failed to update profile'); }
   };
 
-  if (loading) return <ProfileContainer><LoadingContainer><p>Loading profile...</p></LoadingContainer></ProfileContainer>;
+  const formatDate = (d) => {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
   return (
-    <ProfileContainer>
-      <ProfileHeader>
-        <Avatar src={user?.profile_picture || '/default-avatar.svg'} alt={user?.username} />
-        <Username>@{user?.username}</Username>
-        {(user?.first_name || user?.last_name) && <FullName>{user?.first_name} {user?.last_name}</FullName>}
-        {user?.bio && <Bio>{user.bio}</Bio>}
-        {user?.location && <Location>{user.location}</Location>}
-        <EditBtn onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Profile'}</EditBtn>
+    <Container>
+      <Card>
+        <ProfileTop>
+          <AvatarWrap
+            onMouseEnter={() => setHoverAvatar(true)}
+            onMouseLeave={() => setHoverAvatar(false)}
+            onClick={handleAvatarClick}
+          >
+            <Avatar src={user?.profile_picture || '/default-avatar.svg'} alt={user?.username} />
+            <AvatarOverlay $hover={hoverAvatar}>Change Photo</AvatarOverlay>
+            <HiddenInput ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} />
+          </AvatarWrap>
+
+          <Info>
+            <Username>@{user?.username}</Username>
+            {(user?.first_name || user?.last_name) && <FullName>{user?.first_name} {user?.last_name}</FullName>}
+            {user?.bio && <Bio>{user.bio}</Bio>}
+            {user?.location && <LocationText>{user.location}</LocationText>}
+            <JoinDate>Joined {formatDate(user?.date_joined)}</JoinDate>
+
+            <StatsRow>
+              <StatItem><StatNum>{stats?.news_count ?? '—'}</StatNum><StatLabel>posts</StatLabel></StatItem>
+              <StatItem><StatNum>{stats?.total_likes_received ?? '—'}</StatNum><StatLabel>likes received</StatLabel></StatItem>
+              <StatItem><StatNum>{stats?.comments_made ?? '—'}</StatNum><StatLabel>comments</StatLabel></StatItem>
+              <StatItem><StatNum>{stats?.news_liked ?? '—'}</StatNum><StatLabel>liked</StatLabel></StatItem>
+            </StatsRow>
+
+            <BtnRow>
+              <Btn $primary onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Profile'}</Btn>
+            </BtnRow>
+          </Info>
+        </ProfileTop>
+
         {editing && (
-          <EditForm onSubmit={handleSave}>
-            <Input name="first_name" value={form.first_name} onChange={handleChange} placeholder="First name" />
-            <Input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Last name" />
-            <TextArea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" maxLength={500} />
+          <EditForm as="form" onSubmit={handleSave} style={{ marginTop: 20 }}>
+            <FormRow>
+              <Input name="first_name" value={form.first_name} onChange={handleChange} placeholder="First name" />
+              <Input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Last name" />
+            </FormRow>
             <Input name="location" value={form.location} onChange={handleChange} placeholder="Location" />
-            <div style={{ display: 'flex', gap: 12 }}>
-              <SaveBtn type="submit">Save</SaveBtn>
-              <CancelBtn type="button" onClick={() => setEditing(false)}>Cancel</CancelBtn>
-            </div>
+            <TextArea name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" maxLength={500} />
+            <FormRow>
+              <Btn $primary type="submit">Save</Btn>
+              <Btn type="button" onClick={() => setEditing(false)}>Cancel</Btn>
+            </FormRow>
           </EditForm>
         )}
-        <StatsContainer>
-          <Stat><StatNumber>{userNews.length}</StatNumber><StatLabel>News Posts</StatLabel></Stat>
-          <Stat><StatNumber>{userNews.reduce((sum, n) => sum + n.like_count, 0)}</StatNumber><StatLabel>Likes</StatLabel></Stat>
-          <Stat><StatNumber>{userNews.reduce((sum, n) => sum + n.share_count, 0)}</StatNumber><StatLabel>Shares</StatLabel></Stat>
-        </StatsContainer>
-      </ProfileHeader>
-      <NewsContainer>
-        <SectionTitle>Your News Posts</SectionTitle>
-        {error && <ErrorContainer>{error}</ErrorContainer>}
-        {userNews.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#657786' }}><p>You haven't posted any news yet.</p></div>
-        ) : userNews.map((newsItem) => (
-          <NewsCard key={newsItem.id} newsItem={newsItem} onUpdate={fetchUserNews} />
-        ))}
-      </NewsContainer>
-    </ProfileContainer>
+      </Card>
+
+      <Card>
+        <Tabs>
+          <Tab $active={tab === 'posts'} onClick={() => setTab('posts')}>My Posts</Tab>
+          <Tab $active={tab === 'liked'} onClick={() => setTab('liked')}>Liked</Tab>
+          <Tab $active={tab === 'comments'} onClick={() => setTab('comments')}>Comments</Tab>
+        </Tabs>
+
+        {loadingTab && <Empty>Loading...</Empty>}
+
+        {!loadingTab && tab === 'posts' && (
+          posts.length === 0 ? <Empty>No posts yet.</Empty> :
+          posts.map(n => <NewsCard key={n.id} newsItem={n} onUpdate={fetchPosts} />)
+        )}
+
+        {!loadingTab && tab === 'liked' && (
+          likedNews.length === 0 ? <Empty>No liked news yet.</Empty> :
+          likedNews.map(n => <NewsCard key={n.id} newsItem={n} />)
+        )}
+
+        {!loadingTab && tab === 'comments' && (
+          comments.length === 0 ? <Empty>No comments yet.</Empty> :
+          comments.map(c => (
+            <Card key={c.id} style={{ marginBottom: 12, padding: 16 }}>
+              <div style={{ fontSize: 13, color: '#657786', marginBottom: 6 }}>
+                Comment on <strong>{c.news?.title || 'news'}</strong> · {formatDate(c.created_at)}
+              </div>
+              <div style={{ fontSize: 14, color: '#14171A' }}>{c.content}</div>
+            </Card>
+          ))
+        )}
+      </Card>
+    </Container>
   );
 };
 

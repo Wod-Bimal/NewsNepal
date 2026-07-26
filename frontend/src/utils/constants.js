@@ -8,6 +8,10 @@ export const API_ENDPOINTS = {
     LOGOUT: '/api/auth/logout/',
     PROFILE: '/api/auth/profile/',
     UPDATE_PROFILE: '/api/auth/profile/update/',
+    UPLOAD_PICTURE: '/api/auth/profile/upload-picture/',
+    STATS: '/api/auth/profile/stats/',
+    LIKED_NEWS: '/api/auth/profile/liked-news/',
+    MY_COMMENTS: '/api/auth/profile/comments/',
   },
   NEWS: {
     LIST: '/api/news/',
