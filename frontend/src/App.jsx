@@ -12,6 +12,7 @@ import NewsDetail from './pages/NewsDetail.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Profile from './pages/Profile.jsx';
+import CreatePost from './pages/CreatePost.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import './App.css';
 
@@ -44,6 +45,14 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <Profile />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/create" 
+                        element={
+                          <ProtectedRoute>
+                            <CreatePost />
                           </ProtectedRoute>
                         } 
                       />
