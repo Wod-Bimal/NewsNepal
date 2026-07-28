@@ -109,6 +109,7 @@ const Navbar = () => {
           ) : isAuthenticated ? (
             <>
               <NavLink to="/feed">Feed</NavLink>
+              <NavLink to="/create">Add Post</NavLink>
               <NavLink to="/profile">Profile</NavLink>
               <UserInfo>
                 {user?.profile_picture && (
