@@ -83,7 +83,7 @@ const TextArea = styled.textarea`
 const Empty = styled.div`text-align: center; padding: 40px; color: #657786;`;
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, refreshUser } = useAuth();
   const { showSuccess, showError } = useNotification();
   const fileInputRef = useRef(null);
 
@@ -157,11 +157,26 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const res = await authService.uploadPicture(file);
+      await authService.uploadPicture(file);
+      await refreshUser();
       showSuccess('Profile picture updated');
-      window.location.reload();
     } catch {
       showError('Failed to upload picture');
+    }
+  };
+
+  const handleRemovePicture = async () => {
+    if (!user?.profile_picture) {
+      showError('No profile picture to remove');
+      return;
+    }
+
+    try {
+      await authService.removePicture();
+      await refreshUser();
+      showSuccess('Profile picture removed');
+    } catch {
+      showError('Failed to remove picture');
     }
   };
 
@@ -189,7 +204,7 @@ const Profile = () => {
             onClick={handleAvatarClick}
           >
             <Avatar src={user?.profile_picture || '/default-avatar.svg'} alt={user?.username} />
-            <AvatarOverlay $hover={hoverAvatar}>Change Photo</AvatarOverlay>
+            <AvatarOverlay $hover={hoverAvatar}>Add / Change Photo</AvatarOverlay>
             <HiddenInput ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} />
           </AvatarWrap>
 
@@ -209,6 +224,9 @@ const Profile = () => {
 
             <BtnRow>
               <Btn $primary onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : 'Edit Profile'}</Btn>
+              {user?.profile_picture && (
+                <Btn type="button" $danger onClick={handleRemovePicture}>Remove Photo</Btn>
+              )}
             </BtnRow>
           </Info>
         </ProfileTop>

@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     PROFILE: '/api/auth/profile/',
     UPDATE_PROFILE: '/api/auth/profile/update/',
     UPLOAD_PICTURE: '/api/auth/profile/upload-picture/',
+    REMOVE_PICTURE: '/api/auth/profile/remove-picture/',
     STATS: '/api/auth/profile/stats/',
     LIKED_NEWS: '/api/auth/profile/liked-news/',
     MY_COMMENTS: '/api/auth/profile/comments/',

@@ -7,6 +7,10 @@ from django.db.models import Count
 from .serializers import UserSerializer, UserRegistrationSerializer, LoginSerializer
 
 
+def serialize_user(user, request):
+    return UserSerializer(user, context={'request': request}).data
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
@@ -14,7 +18,7 @@ def register(request):
     if serializer.is_valid():
         user = serializer.save()
         login(request, user)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(serialize_user(user, request), status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -25,7 +29,7 @@ def login_view(request):
     if serializer.is_valid():
         user = serializer.validated_data['user']
         login(request, user)
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        return Response(serialize_user(user, request), status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -39,15 +43,14 @@ def logout_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile(request):
-    serializer = UserSerializer(request.user)
-    return Response(serializer.data)
+    return Response(serialize_user(request.user, request))
 
 
 @api_view(['PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
     data = request.data.copy()
-    serializer = UserSerializer(request.user, data=data, partial=True)
+    serializer = UserSerializer(request.user, data=data, partial=True, context={'request': request})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
@@ -61,7 +64,17 @@ def upload_profile_picture(request):
         return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
     request.user.profile_picture = request.FILES['profile_picture']
     request.user.save()
-    return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+    return Response(serialize_user(request.user, request), status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def remove_profile_picture(request):
+    if request.user.profile_picture:
+        request.user.profile_picture.delete(save=False)
+        request.user.profile_picture = None
+        request.user.save(update_fields=['profile_picture'])
+    return Response(serialize_user(request.user, request), status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

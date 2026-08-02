@@ -79,6 +79,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authService.getProfile();
+      setUser(response.data);
+      return { success: true, data: response.data };
+    } catch (error) {
+      setUser(null);
+      return {
+        success: false,
+        error: error.response?.data || { error: 'Failed to refresh profile' },
+      };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -86,6 +100,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    refreshUser,
     isAuthenticated: !!user
   };
 
