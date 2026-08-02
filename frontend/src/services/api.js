@@ -66,6 +66,7 @@ export const authService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  removePicture: () => api.delete(API_ENDPOINTS.AUTH.REMOVE_PICTURE),
   getStats: () => api.get(API_ENDPOINTS.AUTH.STATS),
   getLikedNews: () => api.get(API_ENDPOINTS.AUTH.LIKED_NEWS),
   getMyComments: () => api.get(API_ENDPOINTS.AUTH.MY_COMMENTS),
