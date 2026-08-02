@@ -103,11 +103,15 @@ const Navbar = () => {
         <NavLinks>
           {isLanding && !isAuthenticated ? (
             <>
+              <NavLink to="/">Home</NavLink>
+              <NavLink to="/about">About Us</NavLink>
               <NavLink to="/login">Login</NavLink>
               <Button primary as={Link} to="/register">Sign Up</Button>
             </>
           ) : isAuthenticated ? (
             <>
+              <NavLink to="/">Home</NavLink>
+              <NavLink to="/about">About Us</NavLink>
               <NavLink to="/feed">Feed</NavLink>
               <NavLink to="/create">Add Post</NavLink>
               <NavLink to="/profile">Profile</NavLink>
@@ -124,6 +128,8 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              <NavLink to="/">Home</NavLink>
+              <NavLink to="/about">About Us</NavLink>
               <NavLink to="/login">Login</NavLink>
               <Button primary as={Link} to="/register">Sign Up</Button>
             </>

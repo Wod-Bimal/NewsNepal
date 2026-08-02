@@ -7,6 +7,7 @@ import { NotificationProvider } from './contexts/NotificationContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Navbar from './components/Navbar.jsx';
 import Landing from './pages/Landing.jsx';
+import About from './pages/About.jsx';
 import Feed from './pages/Feed.jsx';
 import NewsDetail from './pages/NewsDetail.jsx';
 import Login from './pages/Login.jsx';
@@ -29,6 +30,7 @@ function App() {
                   <main>
                     <Routes>
                       <Route path="/" element={<Landing />} />
+                      <Route path="/about" element={<About />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/register" element={<Register />} />
                       <Route 
