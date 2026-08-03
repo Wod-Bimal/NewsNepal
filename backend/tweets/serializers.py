@@ -78,14 +78,27 @@ class CommentSerializer(serializers.ModelSerializer):
 class NewsSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
-    topic_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    topic_id = serializers.PrimaryKeyRelatedField(
+        queryset=Topic.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+        source='topic'
+    )
     comments = CommentSerializer(many=True, read_only=True)
     like_count = serializers.ReadOnlyField()
     share_count = serializers.ReadOnlyField()
     has_liked = serializers.SerializerMethodField()
     bias_summary = serializers.ReadOnlyField()
     source = NewsSourceSerializer(read_only=True)
-    source_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    source_id = serializers.PrimaryKeyRelatedField(
+        queryset=NewsSource.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+        source='source'
+    )
+    title = serializers.CharField(required=False, allow_blank=True, max_length=255)
 
     class Meta:
         model = News
@@ -100,6 +113,12 @@ class NewsSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(id=request.user.id).exists()
         return False
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get('title') and attrs.get('content'):
+            attrs['title'] = attrs['content'][:255]
+        return attrs
 
     def create(self, data):
         data['author'] = self.context['request'].user
