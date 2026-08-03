@@ -196,10 +196,13 @@ const NewsForm = ({ onNewsCreated }) => {
     setIsSubmitting(true);
 
     try {
+      const postTitle = content.trim().slice(0, 80) || 'New post';
+
       await newsService.createNews({
+        title: postTitle,
         content,
         image,
-        topic: selectedTopic || undefined,
+        topic_id: selectedTopic || undefined,
         source_id: selectedSource || undefined,
         source_url: sourceUrl || undefined,
       });
