@@ -113,6 +113,7 @@ const Navbar = () => {
               <NavLink to="/">Home</NavLink>
               <NavLink to="/about">About Us</NavLink>
               <NavLink to="/feed">Feed</NavLink>
+              <NavLink to="/dashboard">Dashboard</NavLink>
               <NavLink to="/create">Add Post</NavLink>
               <NavLink to="/profile">Profile</NavLink>
               <UserInfo>
