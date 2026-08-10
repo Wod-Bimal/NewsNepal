@@ -174,6 +174,25 @@ const TopicChip = styled(Link)`
   &:hover { background: #E8F2FF; }
 `;
 
+const PreviewCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #E1E8ED;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+`;
+
+const PreviewTitle = styled.h4`
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #14171A;
+`;
+
+const PreviewText = styled.p`
+  color: #657786;
+  line-height: 1.7;
+`;
+
 const Features = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -351,6 +370,33 @@ const Landing = () => {
             </DetailText>
           </HeroDetails>
         </Hero>
+
+        <PreviewGrid>
+          <NewsPreview>
+            <PreviewCard>
+              <PreviewTitle>Top stories preview</PreviewTitle>
+              <PreviewText>
+                Discover the kind of news you’ll see after you sign in: local updates, topic highlights, and trending coverage from across Nepal.
+              </PreviewText>
+            </PreviewCard>
+          </NewsPreview>
+
+          <Sidebar>
+            <SidebarCard>
+              <PreviewTitle>Why join?</PreviewTitle>
+              <PreviewText>
+                Create your own posts, follow topics you care about, and personalize your feed so news stays relevant to you.
+              </PreviewText>
+            </SidebarCard>
+
+            <SidebarCard>
+              <PreviewTitle>Fast access</PreviewTitle>
+              <PreviewText>
+                Get straight to the feed, explore topic categories, and see the latest stories from sources you trust.
+              </PreviewText>
+            </SidebarCard>
+          </Sidebar>
+        </PreviewGrid>
 
         <Features>
           <Feature>
