@@ -120,4 +120,20 @@ export const commentService = {
   deleteComment: (newsId, id) => api.delete(API_ENDPOINTS.COMMENTS.DELETE(newsId, id)),
 };
 
+// Messaging services
+export const conversationService = {
+  getConversations: () => api.get(API_ENDPOINTS.MESSAGING.CONVERSATIONS),
+  getConversation: (id) => api.get(API_ENDPOINTS.MESSAGING.CONVERSATION_DETAIL(id)),
+  createConversation: (data) => api.post(API_ENDPOINTS.MESSAGING.CONVERSATIONS, data),
+  sendMessage: (id, data) => api.post(API_ENDPOINTS.MESSAGING.SEND_MESSAGE(id), data),
+  markRead: (id) => api.post(API_ENDPOINTS.MESSAGING.MARK_READ(id)),
+  getUnread: () => api.get(API_ENDPOINTS.MESSAGING.UNREAD),
+  searchUsers: (q) => api.get(`${API_ENDPOINTS.MESSAGING.USER_SEARCH}?q=${encodeURIComponent(q)}`),
+};
+
+export const threadService = {
+  getThread: (newsId) => api.get(API_ENDPOINTS.MESSAGING.THREAD(newsId)),
+  postMessage: (newsId, data) => api.post(API_ENDPOINTS.MESSAGING.THREAD(newsId), data),
+};
+
 export default api;

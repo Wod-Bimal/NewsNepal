@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
+import { FaEnvelope } from 'react-icons/fa';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
@@ -82,6 +83,18 @@ const Username = styled.span`
   color: #14171A;
 `;
 
+const MessagesLink = styled(Link)`
+  color: #1DA1F2;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+  position: relative;
+  &:hover { background-color: #F7F9FA; }
+`;
+
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { showSuccess } = useNotification();
@@ -115,6 +128,7 @@ const Navbar = () => {
               <NavLink to="/feed">Feed</NavLink>
               <NavLink to="/dashboard">Dashboard</NavLink>
               <NavLink to="/create">Add Post</NavLink>
+              <NavLink to="/messages">Messages</NavLink>
               <NavLink to="/profile">Profile</NavLink>
               <UserInfo>
                 {user?.profile_picture && (

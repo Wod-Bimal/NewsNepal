@@ -35,6 +35,16 @@ export const API_ENDPOINTS = {
   BIAS: {
     VOTE: (newsId) => `/api/news/${newsId}/bias/`,
   },
+  MESSAGING: {
+    CONVERSATIONS: '/api/conversations/',
+    CONVERSATION_DETAIL: (id) => `/api/conversations/${id}/`,
+    SEND_MESSAGE: (id) => `/api/conversations/${id}/send_message/`,
+    MARK_READ: (id) => `/api/conversations/${id}/mark_read/`,
+    ADD_PARTICIPANT: (id) => `/api/conversations/${id}/add_participant/`,
+    UNREAD: '/api/conversations/unread/',
+    THREAD: (newsId) => `/api/threads/news/${newsId}/`,
+    USER_SEARCH: '/api/users/search/',
+  },
 };
 
 // App constants

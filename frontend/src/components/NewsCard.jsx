@@ -4,7 +4,7 @@ import { useNotification } from '../contexts/NotificationContext.jsx';
 import { newsService, commentService, biasVoteService } from '../services/api.js';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaHeart, FaComment, FaTrash, FaPaperPlane, FaFlag } from 'react-icons/fa';
+import { FaHeart, FaComment, FaTrash, FaPaperPlane, FaFlag, FaComments, FaShare } from 'react-icons/fa';
 import { BIAS_CONFIG } from '../utils/constants.js';
 
 const NewsContainer = styled.div`
@@ -284,6 +284,14 @@ const NewsCard = ({ newsItem, onUpdate }) => {
         <ActionButton onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}>
           <FaComment /> {newsItem.comment_count || localComments.length}
         </ActionButton>
+        <ActionButton onClick={(e) => { e.stopPropagation(); navigate(`/news/${newsItem.id}/discuss`); }}>
+          <FaComments /> Discuss
+        </ActionButton>
+        {isAuthenticated && (
+          <ActionButton onClick={(e) => { e.stopPropagation(); navigate(`/messages?share=${newsItem.id}`); }}>
+            <FaShare /> Share
+          </ActionButton>
+        )}
       </NewsActions>
 
       {showComments && (
