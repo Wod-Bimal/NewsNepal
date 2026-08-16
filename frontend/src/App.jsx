@@ -15,6 +15,8 @@ import Register from './pages/Register.jsx';
 import Profile from './pages/Profile.jsx';
 import CreatePost from './pages/CreatePost.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Messages from './pages/Messages.jsx';
+import ArticleDiscussion from './pages/ArticleDiscussion.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import './App.css';
 
@@ -64,6 +66,30 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <CreatePost />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/messages" 
+                        element={
+                          <ProtectedRoute>
+                            <Messages />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/messages/:id" 
+                        element={
+                          <ProtectedRoute>
+                            <Messages />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/news/:id/discuss" 
+                        element={
+                          <ProtectedRoute>
+                            <ArticleDiscussion />
                           </ProtectedRoute>
                         } 
                       />
