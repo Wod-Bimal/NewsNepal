@@ -17,6 +17,7 @@ import CreatePost from './pages/CreatePost.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Messages from './pages/Messages.jsx';
 import ArticleDiscussion from './pages/ArticleDiscussion.jsx';
+import PublicProfile from './pages/PublicProfile.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import './App.css';
 
@@ -90,6 +91,14 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <ArticleDiscussion />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/users/:id" 
+                        element={
+                          <ProtectedRoute>
+                            <PublicProfile />
                           </ProtectedRoute>
                         } 
                       />

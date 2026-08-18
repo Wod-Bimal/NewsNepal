@@ -1,17 +1,51 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User
+from .models import User, Follow
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model."""
-    
+    """Serializer for current user (full profile)."""
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 
                  'bio', 'location', 'birth_date', 'profile_picture', 
-                 'created_at', 'updated_at', 'is_staff', 'is_superuser']
-        read_only_fields = ['id', 'created_at', 'updated_at', 'is_staff', 'is_superuser']
+                 'created_at', 'updated_at', 'is_staff', 'is_superuser',
+                 'followers_count', 'following_count']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_staff', 'is_superuser',
+                           'followers_count', 'following_count']
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    """Serializer for viewing other users' profiles."""
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+    is_following = serializers.SerializerMethodField()
+    is_followed_by = serializers.SerializerMethodField()
+    posts_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'bio', 'location',
+                 'profile_picture', 'created_at', 'followers_count', 'following_count',
+                 'is_following', 'is_followed_by', 'posts_count']
+
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return Follow.objects.filter(follower=request.user, following=obj).exists()
+
+    def get_is_followed_by(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return Follow.objects.filter(follower=obj, following=request.user).exists()
+
+    def get_posts_count(self, obj):
+        return obj.news.count()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

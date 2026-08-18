@@ -43,6 +43,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if not is_group:
             all_ids = list(set(participant_ids + [request.user.id]))
             if len(all_ids) == 2:
+                other_id = [uid for uid in all_ids if uid != request.user.id][0]
+                from accounts.models import Follow
+                has_connection = Follow.objects.filter(
+                    Q(follower=request.user, following_id=other_id) |
+                    Q(follower_id=other_id, following=request.user)
+                ).exists()
+                if not has_connection:
+                    return Response(
+                        {'error': 'You can only message users you follow or who follow you'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+
                 existing = Conversation.objects.filter(
                     is_group=False,
                     participants__user_id=all_ids[0],
@@ -191,11 +203,25 @@ def unread_counts(request):
 @permission_classes([IsAuthenticated])
 def user_search(request):
     query = request.query_params.get('q', '').strip()
+    followed_only = request.query_params.get('followed_only', 'false') == 'true'
     if len(query) < 2:
         return Response([])
-    from accounts.models import User
+    from accounts.models import User, Follow
     users = User.objects.filter(
         Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
-    ).exclude(id=request.user.id)[:10]
-    from accounts.serializers import UserSerializer
-    return Response(UserSerializer(users, many=True).data)
+    ).exclude(id=request.user.id)
+
+    if followed_only:
+        followed_ids = Follow.objects.filter(
+            Q(follower=request.user) | Q(following=request.user)
+        ).values_list('follower_id', 'following_id')
+        connected_ids = set()
+        for fid, fid2 in followed_ids:
+            connected_ids.add(fid)
+            connected_ids.add(fid2)
+        connected_ids.discard(request.user.id)
+        users = users.filter(id__in=connected_ids)
+
+    users = users[:10]
+    from accounts.serializers import UserPublicSerializer
+    return Response(UserPublicSerializer(users, many=True, context={'request': request}).data)

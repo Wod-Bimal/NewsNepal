@@ -11,7 +11,6 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # Add related_name to avoid clash with auth.User.groups
     groups = models.ManyToManyField(
         Group,
         verbose_name='groups',
@@ -21,7 +20,6 @@ class User(AbstractUser):
         related_query_name='accounts_user',
     )
     
-    # Add related_name to avoid clash with auth.User.user_permissions
     user_permissions = models.ManyToManyField(
         Permission,
         verbose_name='user permissions',
@@ -33,3 +31,29 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.username
+
+    @property
+    def followers_count(self):
+        return self.followers.count()
+
+    @property
+    def following_count(self):
+        return self.following.count()
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.follower == self.following:
+            raise ValidationError("Users cannot follow themselves.")

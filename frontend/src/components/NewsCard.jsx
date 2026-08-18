@@ -30,7 +30,10 @@ const Avatar = styled.img`
 
 const UserInfo = styled.div`flex: 1;`;
 
-const Username = styled.span`font-weight: 600; color: #14171A; margin-right: 8px;`;
+const Username = styled.span`
+  font-weight: 600; color: #14171A; margin-right: 8px; cursor: pointer;
+  &:hover { text-decoration: underline; color: #1DA1F2; }
+`;
 
 const Topic = styled.span`
   background: ${props => props.color || '#1DA1F2'}; color: white; padding: 4px 8px;
@@ -221,7 +224,9 @@ const NewsCard = ({ newsItem, onUpdate }) => {
       <NewsHeader>
         <Avatar src={newsItem.author.profile_picture || '/default-avatar.svg'} alt={newsItem.author.username} />
         <UserInfo>
-          <Username>{newsItem.author.username}</Username>
+          <Username onClick={(e) => { e.stopPropagation(); navigate(`/users/${newsItem.author.id}`); }}>
+            {newsItem.author.username}
+          </Username>
           {newsItem.topic && <Topic color={newsItem.topic.color}>{newsItem.topic.name}</Topic>}
         </UserInfo>
         <Timestamp>{formatDate(newsItem.created_at)}</Timestamp>

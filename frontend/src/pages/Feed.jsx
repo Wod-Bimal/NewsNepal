@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
 import NewsForm from '../components/NewsForm.jsx';
 import NewsCard from '../components/NewsCard.jsx';
-import { newsService, topicService, sourceService } from '../services/api.js';
+import { newsService, topicService, sourceService, userService } from '../services/api.js';
 import { BIAS_CONFIG } from '../utils/constants.js';
 
 const TabsContainer = styled.div`
@@ -148,6 +148,8 @@ const Feed = () => {
   const [biasFilter, setBiasFilter] = useState('all');
   const [sources, setSources] = useState([]);
   const [feedTab, setFeedTab] = useState('for-you');
+  const [followingNews, setFollowingNews] = useState([]);
+  const [loadingFollowing, setLoadingFollowing] = useState(false);
   const nextPageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -199,6 +201,40 @@ const Feed = () => {
     fetchNews();
   };
 
+  const fetchFollowingFeed = useCallback(async () => {
+    setLoadingFollowing(true);
+    try {
+      const profileRes = await userService.getPublicProfile(user.id);
+      const followingIds = [];
+      const followingRes = await userService.getFollowing(user.id);
+      const users = followingRes.data || [];
+      users.forEach(u => followingIds.push(u.id));
+
+      if (followingIds.length === 0) {
+        setFollowingNews([]);
+        setLoadingFollowing(false);
+        return;
+      }
+
+      const allNews = [];
+      for (const uid of followingIds.slice(0, 5)) {
+        try {
+          const res = await userService.getUserNews(uid);
+          allNews.push(...(res.data || []));
+        } catch { /* skip */ }
+      }
+      allNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setFollowingNews(allNews);
+    } catch { /* ignore */ }
+    setLoadingFollowing(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (feedTab === 'following') {
+      fetchFollowingFeed();
+    }
+  }, [feedTab, fetchFollowingFeed]);
+
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -229,11 +265,19 @@ const Feed = () => {
         </TabsContainer>
 
         {feedTab === 'following' && (
-          <div style={{ background: 'white', border: '1px solid #E1E8ED', borderRadius: '12px', padding: '40px 20px', marginBottom: '20px', textAlign: 'center', color: '#657786' }}>
-            <p style={{ fontWeight: 600, marginBottom: 8 }}>Follow topics and people</p>
-            <p style={{ fontSize: 14 }}>Your following feed will show news from topics and users you follow.</p>
-          </div>
+          loadingFollowing ? (
+            <div style={{ background: 'white', border: '1px solid #E1E8ED', borderRadius: '12px', padding: '40px 20px', marginBottom: '20px', textAlign: 'center', color: '#657786' }}>
+              Loading your feed...
+            </div>
+          ) : followingNews.length === 0 ? (
+            <div style={{ background: 'white', border: '1px solid #E1E8ED', borderRadius: '12px', padding: '40px 20px', marginBottom: '20px', textAlign: 'center', color: '#657786' }}>
+              <p style={{ fontWeight: 600, marginBottom: 8 }}>No posts from people you follow</p>
+              <p style={{ fontSize: 14 }}>Follow users to see their posts here.</p>
+            </div>
+          ) : null
         )}
+
+        {feedTab === 'following' && followingNews.length > 0 && null}
 
         <NewsForm onNewsCreated={handleNewsCreated} />
 
@@ -252,19 +296,29 @@ const Feed = () => {
           </ErrorContainer>
         )}
 
-        {news.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#657786' }}>
-            <p>No news posts found. Be the first to share an update!</p>
-          </div>
-        ) : (
-          news.map((item) => (
+        {feedTab === 'following' && followingNews.length > 0 ? (
+          followingNews.map((item) => (
             <NewsCard
               key={item.id}
               newsItem={item}
-              onUpdate={fetchNews}
+              onUpdate={fetchFollowingFeed}
             />
           ))
-        )}
+        ) : feedTab !== 'following' ? (
+          news.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#657786' }}>
+              <p>No news posts found. Be the first to share an update!</p>
+            </div>
+          ) : (
+            news.map((item) => (
+              <NewsCard
+                key={item.id}
+                newsItem={item}
+                onUpdate={fetchNews}
+              />
+            ))
+          )
+        ) : null}
         {hasMore && news.length > 0 && (
           <LoadMoreButton onClick={() => fetchNews(true)} disabled={loadingMore}>
             {loadingMore ? 'Loading...' : 'Load More'}
