@@ -45,6 +45,13 @@ export const API_ENDPOINTS = {
     THREAD: (newsId) => `/api/threads/news/${newsId}/`,
     USER_SEARCH: '/api/users/search/',
   },
+  USERS: {
+    PUBLIC_PROFILE: (id) => `/api/auth/users/${id}/`,
+    FOLLOW: (id) => `/api/auth/users/${id}/follow/`,
+    FOLLOWERS: (id) => `/api/auth/users/${id}/followers/`,
+    FOLLOWING: (id) => `/api/auth/users/${id}/following/`,
+    NEWS: (id) => `/api/auth/users/${id}/news/`,
+  },
 };
 
 // App constants

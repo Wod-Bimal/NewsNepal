@@ -128,12 +128,26 @@ export const conversationService = {
   sendMessage: (id, data) => api.post(API_ENDPOINTS.MESSAGING.SEND_MESSAGE(id), data),
   markRead: (id) => api.post(API_ENDPOINTS.MESSAGING.MARK_READ(id)),
   getUnread: () => api.get(API_ENDPOINTS.MESSAGING.UNREAD),
-  searchUsers: (q) => api.get(`${API_ENDPOINTS.MESSAGING.USER_SEARCH}?q=${encodeURIComponent(q)}`),
+  searchUsers: (q, followedOnly = false) => {
+    const params = new URLSearchParams({ q });
+    if (followedOnly) params.append('followed_only', 'true');
+    return api.get(`${API_ENDPOINTS.MESSAGING.USER_SEARCH}?${params.toString()}`);
+  },
 };
 
 export const threadService = {
   getThread: (newsId) => api.get(API_ENDPOINTS.MESSAGING.THREAD(newsId)),
   postMessage: (newsId, data) => api.post(API_ENDPOINTS.MESSAGING.THREAD(newsId), data),
+};
+
+// User / Follow services
+export const userService = {
+  getPublicProfile: (id) => api.get(API_ENDPOINTS.USERS.PUBLIC_PROFILE(id)),
+  follow: (id) => api.post(API_ENDPOINTS.USERS.FOLLOW(id)),
+  unfollow: (id) => api.delete(API_ENDPOINTS.USERS.FOLLOW(id)),
+  getFollowers: (id) => api.get(API_ENDPOINTS.USERS.FOLLOWERS(id)),
+  getFollowing: (id) => api.get(API_ENDPOINTS.USERS.FOLLOWING(id)),
+  getUserNews: (id) => api.get(API_ENDPOINTS.USERS.NEWS(id)),
 };
 
 export default api;

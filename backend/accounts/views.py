@@ -4,7 +4,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import login, logout
 from django.db.models import Count
-from .serializers import UserSerializer, UserRegistrationSerializer, LoginSerializer
+from .models import User, Follow
+from .serializers import UserSerializer, UserPublicSerializer, UserRegistrationSerializer, LoginSerializer
 
 
 def serialize_user(user, request):
@@ -96,6 +97,8 @@ def user_stats(request):
         'comments_made': comments_made,
         'news_liked': news_liked,
         'bias_votes': bias_votes,
+        'followers_count': user.followers_count,
+        'following_count': user.following_count,
     })
 
 
@@ -116,4 +119,105 @@ def user_comments(request):
     from tweets.serializers import CommentSerializer
     comments = Comment.objects.filter(author=request.user).select_related('news').order_by('-created_at')[:50]
     serializer = CommentSerializer(comments, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+# --- Public User Profile ---
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_public_profile(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = UserPublicSerializer(user, context={'request': request})
+    return Response(serializer.data)
+
+
+# --- Follow / Unfollow ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    try:
+        target = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user == target:
+        return Response({'error': 'Cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+
+    follow, created = Follow.objects.get_or_create(follower=request.user, following=target)
+    if not created:
+        return Response({'error': 'Already following'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        'status': 'following',
+        'followers_count': target.followers_count,
+        'following_count': request.user.following_count,
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    try:
+        target = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    deleted, _ = Follow.objects.filter(follower=request.user, following=target).delete()
+    if not deleted:
+        return Response({'error': 'Not following'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        'status': 'unfollowed',
+        'followers_count': target.followers_count,
+        'following_count': request.user.following_count,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_followers(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    followers = Follow.objects.filter(following=user).select_related('follower')
+    users = [f.follower for f in followers]
+    from .serializers import UserPublicSerializer
+    serializer = UserPublicSerializer(users, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_following_list(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    following = Follow.objects.filter(follower=user).select_related('following')
+    users = [f.following for f in following]
+    from .serializers import UserPublicSerializer
+    serializer = UserPublicSerializer(users, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_news(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    from tweets.models import News
+    from tweets.serializers import NewsSerializer
+    news = News.objects.filter(author=user, status='published').order_by('-created_at')[:50]
+    serializer = NewsSerializer(news, many=True, context={'request': request})
     return Response(serializer.data)
