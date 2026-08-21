@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
+import FollowListModal from '../components/FollowListModal.jsx';
 import { newsService, authService } from '../services/api.js';
 
 const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
@@ -40,10 +41,14 @@ const Bio = styled.p`color: #14171A; margin: 0 0 8px 0; line-height: 1.5; font-s
 const LocationText = styled.div`color: #657786; font-size: 14px; margin-bottom: 4px;`;
 const JoinDate = styled.div`color: #9CA3AF; font-size: 13px;`;
 
-const StatsRow = styled.div`display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;`;
+const StatsRow = styled.div`display: flex; gap: 32px; margin-top: 12px; flex-wrap: wrap;`;
 const StatItem = styled.div`text-align: center;`;
-const StatNum = styled.span`font-weight: 700; font-size: 18px; color: #14171A;`;
-const StatLabel = styled.span`color: #657786; font-size: 13px; margin-left: 4px;`;
+const StatNum = styled.span`font-weight: 700; font-size: 18px; color: #14171A; display: block;`;
+const StatLabel = styled.span`color: #657786; font-size: 13px;`;
+const StatLink = styled.button`
+  background: none; border: none; cursor: pointer; padding: 0; text-align: center;
+  &:hover span:first-child { color: #1DA1F2; }
+`;
 
 const BtnRow = styled.div`display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;`;
 
@@ -97,6 +102,7 @@ const Profile = () => {
   const [likedNews, setLikedNews] = useState([]);
   const [comments, setComments] = useState([]);
   const [loadingTab, setLoadingTab] = useState(false);
+  const [showFollowModal, setShowFollowModal] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -217,9 +223,14 @@ const Profile = () => {
 
             <StatsRow>
               <StatItem><StatNum>{stats?.news_count ?? '—'}</StatNum><StatLabel>posts</StatLabel></StatItem>
-              <StatItem><StatNum>{stats?.total_likes_received ?? '—'}</StatNum><StatLabel>likes received</StatLabel></StatItem>
-              <StatItem><StatNum>{stats?.comments_made ?? '—'}</StatNum><StatLabel>comments</StatLabel></StatItem>
-              <StatItem><StatNum>{stats?.news_liked ?? '—'}</StatNum><StatLabel>liked</StatLabel></StatItem>
+              <StatLink onClick={() => setShowFollowModal('followers')}>
+                <StatNum>{stats?.followers_count ?? 0}</StatNum>
+                <StatLabel>followers</StatLabel>
+              </StatLink>
+              <StatLink onClick={() => setShowFollowModal('following')}>
+                <StatNum>{stats?.following_count ?? 0}</StatNum>
+                <StatLabel>following</StatLabel>
+              </StatLink>
             </StatsRow>
 
             <BtnRow>
@@ -246,6 +257,15 @@ const Profile = () => {
           </EditForm>
         )}
       </Card>
+
+      {showFollowModal && (
+        <FollowListModal
+          userId={user.id}
+          initialTab={showFollowModal}
+          onClose={() => setShowFollowModal(null)}
+          onUpdate={fetchStats}
+        />
+      )}
 
       <Card>
         <Tabs>

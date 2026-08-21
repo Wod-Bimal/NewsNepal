@@ -66,7 +66,7 @@ const Notification = styled.div`
   min-width: 300px;
   max-width: 400px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  animation: ${props => props.isExiting ? slideOut : slideIn} 0.3s ease-in-out;
+  animation: ${props => props.$isExiting ? slideOut : slideIn} 0.3s ease-in-out;
 `;
 
 const NotificationHeader = styled.div`
@@ -193,7 +193,7 @@ export const NotificationProvider = ({ children }) => {
           <Notification
             key={notification.id}
             type={notification.type}
-            isExiting={notification.isExiting}
+            $isExiting={notification.isExiting}
           >
             <NotificationHeader>
               <NotificationTitle>{notification.title}</NotificationTitle>
