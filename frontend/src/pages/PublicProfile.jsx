@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
+import FollowListModal from '../components/FollowListModal.jsx';
 import { userService } from '../services/api.js';
 import { FaArrowLeft, FaEnvelope, FaUserPlus, FaUserCheck, FaUserMinus } from 'react-icons/fa';
 
@@ -42,10 +43,14 @@ const Bio = styled.p`color: #14171A; margin: 0 0 8px 0; line-height: 1.5; font-s
 const LocationText = styled.div`color: #657786; font-size: 14px; margin-bottom: 4px;`;
 const JoinDate = styled.div`color: #9CA3AF; font-size: 13px;`;
 
-const StatsRow = styled.div`display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;`;
+const StatsRow = styled.div`display: flex; gap: 32px; margin-top: 12px; flex-wrap: wrap;`;
 const StatItem = styled.div`text-align: center;`;
-const StatNum = styled.span`font-weight: 700; font-size: 18px; color: #14171A;`;
-const StatLabel = styled.span`color: #657786; font-size: 13px; margin-left: 4px;`;
+const StatNum = styled.span`font-weight: 700; font-size: 18px; color: #14171A; display: block;`;
+const StatLabel = styled.span`color: #657786; font-size: 13px;`;
+const StatLink = styled.button`
+  background: none; border: none; cursor: pointer; padding: 0; text-align: center;
+  &:hover span:first-child { color: #1DA1F2; }
+`;
 
 const BtnRow = styled.div`display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;`;
 
@@ -57,12 +62,6 @@ const Btn = styled.button`
   display: flex; align-items: center; gap: 6px;
   &:hover { opacity: 0.85; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
-`;
-
-const FollowStatLink = styled.button`
-  background: none; border: none; cursor: pointer; padding: 0;
-  text-align: center;
-  &:hover { text-decoration: underline; }
 `;
 
 const Tabs = styled.div`display: flex; border-bottom: 1px solid #E1E8ED; margin-bottom: 16px; gap: 0;`;
@@ -94,6 +93,7 @@ const PublicProfile = () => {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [tab, setTab] = useState('posts');
+  const [showFollowModal, setShowFollowModal] = useState(null);
 
   const isOwnProfile = currentUser?.id === parseInt(id);
 
@@ -188,23 +188,17 @@ const PublicProfile = () => {
 
             <StatsRow>
               <StatItem>
-                <FollowStatLink>
-                  <StatNum>{profile.posts_count}</StatNum>
-                  <StatLabel>posts</StatLabel>
-                </FollowStatLink>
+                <StatNum>{profile.posts_count}</StatNum>
+                <StatLabel>posts</StatLabel>
               </StatItem>
-              <StatItem>
-                <FollowStatLink>
-                  <StatNum>{profile.followers_count}</StatNum>
-                  <StatLabel>followers</StatLabel>
-                </FollowStatLink>
-              </StatItem>
-              <StatItem>
-                <FollowStatLink>
-                  <StatNum>{profile.following_count}</StatNum>
-                  <StatLabel>following</StatLabel>
-                </FollowStatLink>
-              </StatItem>
+              <StatLink onClick={() => setShowFollowModal('followers')}>
+                <StatNum>{profile.followers_count}</StatNum>
+                <StatLabel>followers</StatLabel>
+              </StatLink>
+              <StatLink onClick={() => setShowFollowModal('following')}>
+                <StatNum>{profile.following_count}</StatNum>
+                <StatLabel>following</StatLabel>
+              </StatLink>
             </StatsRow>
 
             {!isOwnProfile && (
@@ -222,6 +216,15 @@ const PublicProfile = () => {
           </Info>
         </ProfileTop>
       </Card>
+
+      {showFollowModal && (
+        <FollowListModal
+          userId={id}
+          initialTab={showFollowModal}
+          onClose={() => setShowFollowModal(null)}
+          onUpdate={fetchProfile}
+        />
+      )}
 
       <Card>
         <Tabs>
