@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import ConversationList from '../components/chat/ConversationList.jsx';
 import MessageList from '../components/chat/MessageBubble.jsx';
@@ -122,6 +122,7 @@ const EmptyChat = styled.div`
 const Messages = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
 
@@ -156,6 +157,26 @@ const Messages = () => {
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
+
+  useEffect(() => {
+    const userId = searchParams.get('userId');
+    const sharedNewsId = searchParams.get('share');
+    if (userId && !id) {
+      const startConversation = async () => {
+        try {
+          const res = await conversationService.createConversation({
+            participant_ids: [parseInt(userId)],
+            is_group: false,
+          });
+          const conv = res.data;
+          navigate(`/messages/${conv.id}`, { replace: true });
+        } catch {
+          showError('Failed to start conversation');
+        }
+      };
+      startConversation();
+    }
+  }, [searchParams, id, navigate, showError]);
 
   useEffect(() => {
     if (id) {
@@ -214,16 +235,7 @@ const Messages = () => {
   }, [lastMessage, activeConv, user, markRead, fetchConversations]);
 
   const handleSend = (content) => {
-    const sent = sendMessage({ type: 'message', content });
-    if (sent) {
-      conversationService.sendMessage(activeConv.id, { content }).then(res => {
-        setMessages(prev => {
-          if (prev.some(m => m.id === res.data.id)) return prev;
-          return [...prev, res.data];
-        });
-        fetchConversations();
-      }).catch(() => {});
-    }
+    sendMessage({ type: 'message', content });
   };
 
   const handleTyping = (isTyping) => {
