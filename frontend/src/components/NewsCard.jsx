@@ -293,7 +293,7 @@ const NewsCard = ({ newsItem, onUpdate }) => {
           <FaComments /> Discuss
         </ActionButton>
         {isAuthenticated && (
-          <ActionButton onClick={(e) => { e.stopPropagation(); navigate(`/messages?share=${newsItem.id}`); }}>
+          <ActionButton onClick={(e) => { e.stopPropagation(); navigate(`/messages?userId=${newsItem.author.id}&share=${newsItem.id}`); }}>
             <FaShare /> Share
           </ActionButton>
         )}

@@ -5,7 +5,7 @@ import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
 import FollowListModal from '../components/FollowListModal.jsx';
-import { userService } from '../services/api.js';
+import { userService, conversationService } from '../services/api.js';
 import { FaArrowLeft, FaEnvelope, FaUserPlus, FaUserCheck, FaUserMinus } from 'react-icons/fa';
 
 const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
@@ -148,8 +148,17 @@ const PublicProfile = () => {
     setFollowLoading(false);
   };
 
-  const handleMessage = () => {
-    navigate('/messages');
+  const handleMessage = async () => {
+    try {
+      const res = await conversationService.createConversation({
+        participant_ids: [parseInt(id)],
+        is_group: false,
+      });
+      const conv = res.data;
+      navigate(`/messages/${conv.id}`);
+    } catch {
+      showError('Failed to start conversation');
+    }
   };
 
   const formatDate = (d) => {
