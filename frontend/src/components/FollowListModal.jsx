@@ -75,9 +75,9 @@ const FullName = styled.div`
 const FollowBtn = styled.button`
   padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 13px;
   cursor: pointer; flex-shrink: 0; border: 1px solid
-  ${p => p.$isFollowing ? '#E1E8ED' : '#1DA1F2'};
-  background: ${p => p.$isFollowing ? 'transparent' : '#1DA1F2'};
-  color: ${p => p.$isFollowing ? '#14171A' : 'white'};
+  ${p => p.$isFollowing ? '#E1E8ED' : p.$followBack ? '#059669' : '#1DA1F2'};
+  background: ${p => p.$isFollowing ? 'transparent' : p.$followBack ? '#059669' : '#1DA1F2'};
+  color: ${p => (p.$isFollowing || p.$followBack) ? (p.$followBack && !p.$isFollowing ? 'white' : '#14171A') : 'white'};
   transition: all 0.2s;
   &:hover { opacity: 0.85; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -182,13 +182,14 @@ const FollowListModal = ({ userId, initialTab = 'followers', onClose, onUpdate }
                     <FullName>{u.first_name} {u.last_name}</FullName>
                   )}
                 </UserInfo>
-                {!isOwn && currentUser?.id !== u.id && (
+                {currentUser?.id !== u.id && (
                   <FollowBtn
                     $isFollowing={u.is_following}
+                    $followBack={tab === 'followers' && u.is_followed_by && !u.is_following}
                     onClick={() => handleFollowToggle(u.id, u.is_following)}
                     disabled={actionLoading === u.id}
                   >
-                    {u.is_following ? 'Following' : 'Follow'}
+                    {u.is_following ? 'Following' : tab === 'followers' && u.is_followed_by ? 'Follow Back' : 'Follow'}
                   </FollowBtn>
                 )}
               </UserRow>
