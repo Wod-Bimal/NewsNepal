@@ -59,9 +59,9 @@ const BiasIndicator = styled.span`
 `;
 
 const BiasVoteButton = styled.button`
-  background: ${props => props.active ? props.color + '20' : 'transparent'};
-  color: ${props => props.active ? props.color : '#657786'};
-  border: 1px solid ${props => props.active ? props.color : '#E1E8ED'};
+  background: ${props => props.$active ? props.color + '20' : 'transparent'};
+  color: ${props => props.$active ? props.color : '#657786'};
+  border: 1px solid ${props => props.$active ? props.color : '#E1E8ED'};
   border-radius: 12px; padding: 2px 8px; font-size: 11px; cursor: pointer;
   font-weight: 600; transition: all 0.2s;
   &:hover { border-color: ${props => props.color}; color: ${props => props.color}; }
@@ -79,9 +79,9 @@ const NewsActions = styled.div`
 
 const ActionButton = styled.button`
   display: flex; align-items: center; gap: 6px; background: none; border: none;
-  color: ${props => props.active ? '#E0245E' : '#657786'}; cursor: pointer; font-size: 14px; font-weight: 600;
+  color: ${props => props.$active ? '#E0245E' : '#657786'}; cursor: pointer; font-size: 14px; font-weight: 600;
   transition: color 0.3s ease;
-  &:hover { color: ${props => props.active ? '#C71E5A' : '#1DA1F2'}; }
+  &:hover { color: ${props => props.$active ? '#C71E5A' : '#1DA1F2'}; }
 `;
 
 const DeleteButton = styled.button`
@@ -260,7 +260,7 @@ const NewsCard = ({ newsItem, onUpdate }) => {
           {biasVoteOptions.map(opt => (
             <BiasVoteButton
               key={opt.key}
-              active={userBias === opt.key}
+              $active={userBias === opt.key}
               color={BIAS_CONFIG[opt.key].color}
               onClick={(e) => { e.stopPropagation(); handleBiasVote(opt.key); }}
             >
@@ -283,7 +283,7 @@ const NewsCard = ({ newsItem, onUpdate }) => {
       {newsItem.image && <NewsImage src={newsItem.image} alt="" />}
 
       <NewsActions>
-        <ActionButton active={newsItem.is_liked} onClick={handleLike} disabled={isLiking}>
+        <ActionButton $active={newsItem.is_liked} onClick={handleLike} disabled={isLiking}>
           <FaHeart /> {newsItem.like_count}
         </ActionButton>
         <ActionButton onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}>

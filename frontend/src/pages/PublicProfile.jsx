@@ -82,6 +82,11 @@ const MutualBadge = styled.span`
   padding: 2px 8px; border-radius: 10px; margin-left: 8px;
 `;
 
+const FollowsYouBadge = styled.span`
+  background: #1DA1F2; color: white; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+`;
+
 const PublicProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -184,6 +189,9 @@ const PublicProfile = () => {
           <Info>
             <Username>
               @{profile.username}
+              {profile.is_followed_by && !isOwnProfile && (
+                <FollowsYouBadge>Follows You</FollowsYouBadge>
+              )}
               {profile.is_following && profile.is_followed_by && (
                 <MutualBadge>Mutual</MutualBadge>
               )}
@@ -213,7 +221,7 @@ const PublicProfile = () => {
             {!isOwnProfile && (
               <BtnRow>
                 <Btn $primary onClick={handleFollow} disabled={followLoading}>
-                  {profile.is_following ? <><FaUserCheck /> Following</> : <><FaUserPlus /> Follow</>}
+                  {profile.is_following ? <><FaUserCheck /> Following</> : profile.is_followed_by ? <><FaUserPlus /> Follow Back</> : <><FaUserPlus /> Follow</>}
                 </Btn>
                 {(profile.is_following || profile.is_followed_by) && (
                   <Btn onClick={handleMessage}>

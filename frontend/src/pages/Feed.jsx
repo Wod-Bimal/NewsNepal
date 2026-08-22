@@ -18,14 +18,14 @@ const TabsContainer = styled.div`
 const Tab = styled.button`
   flex: 1;
   padding: 14px;
-  background: ${props => props.active ? '#1DA1F2' : 'white'};
-  color: ${props => props.active ? 'white' : '#14171A'};
+  background: ${props => props.$active ? '#1DA1F2' : 'white'};
+  color: ${props => props.$active ? 'white' : '#14171A'};
   border: none;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
   transition: all 0.2s;
-  &:hover { background: ${props => props.active ? '#1991DB' : '#F7F9FA'}; }
+  &:hover { background: ${props => props.$active ? '#1991DB' : '#F7F9FA'}; }
 `;
 
 const FeedContainer = styled.div`
@@ -259,9 +259,9 @@ const Feed = () => {
     <FeedContainer>
       <MainContent>
         <TabsContainer>
-          <Tab active={feedTab === 'for-you'} onClick={() => setFeedTab('for-you')}>For You</Tab>
-          <Tab active={feedTab === 'trending'} onClick={() => setFeedTab('trending')}>Trending</Tab>
-          <Tab active={feedTab === 'following'} onClick={() => setFeedTab('following')}>Following</Tab>
+          <Tab $active={feedTab === 'for-you'} onClick={() => setFeedTab('for-you')}>For You</Tab>
+          <Tab $active={feedTab === 'trending'} onClick={() => setFeedTab('trending')}>Trending</Tab>
+          <Tab $active={feedTab === 'following'} onClick={() => setFeedTab('following')}>Following</Tab>
         </TabsContainer>
 
         {feedTab === 'following' && (

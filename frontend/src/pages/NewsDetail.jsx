@@ -34,7 +34,7 @@ const Actions = styled.div`
 
 const ActionBtn = styled.button`
   display: flex; align-items: center; gap: 8px; background: none; border: none;
-  color: ${props => props.active ? '#E0245E' : '#657786'}; cursor: pointer; font-size: 15px; font-weight: 600;
+  color: ${props => props.$active ? '#E0245E' : '#657786'}; cursor: pointer; font-size: 15px; font-weight: 600;
 `;
 
 const SectionTitle = styled.h3`font-size: 18px; color: #14171A; margin-bottom: 16px;`;
@@ -142,7 +142,7 @@ const NewsDetail = () => {
         <Meta>Published {formatDate(news.published_at || news.created_at)}</Meta>
 
         <Actions>
-          <ActionBtn active={news.is_liked} onClick={handleLike}><FaHeart /> {news.like_count}</ActionBtn>
+          <ActionBtn $active={news.is_liked} onClick={handleLike}><FaHeart /> {news.like_count}</ActionBtn>
         </Actions>
 
         <SectionTitle>Comments ({comments.length})</SectionTitle>
