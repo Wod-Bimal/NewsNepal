@@ -19,6 +19,10 @@ const BackLink = styled.button`
 const Card = styled.div`
   background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px;
   border: 1px solid #E1E8ED;
+
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
 `;
 
 const ProfileTop = styled.div`
@@ -28,16 +32,31 @@ const ProfileTop = styled.div`
 const Avatar = styled.img`
   width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
   border: 4px solid #1DA1F2;
+
+  @media (max-width: 480px) {
+    width: 80px; height: 80px; border-width: 3px;
+  }
 `;
 
 const AvatarPlaceholder = styled.div`
   width: 120px; height: 120px; border-radius: 50%; border: 4px solid #1DA1F2;
   background: #E1E8ED; display: flex; align-items: center; justify-content: center;
   font-size: 48px; color: #657786; font-weight: 700;
+
+  @media (max-width: 480px) {
+    width: 80px; height: 80px; border-width: 3px; font-size: 32px;
+  }
 `;
 
 const Info = styled.div`flex: 1; min-width: 200px;`;
-const Username = styled.h1`color: #14171A; margin: 0 0 4px 0; font-size: 26px;`;
+const Username = styled.h1`
+  color: #14171A; margin: 0 0 4px 0; font-size: 26px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+
+  @media (max-width: 480px) {
+    font-size: 20px;
+  }
+`;
 const FullName = styled.h2`color: #657786; margin: 0 0 8px 0; font-size: 16px; font-weight: normal;`;
 const Bio = styled.p`color: #14171A; margin: 0 0 8px 0; line-height: 1.5; font-size: 14px;`;
 const LocationText = styled.div`color: #657786; font-size: 14px; margin-bottom: 4px;`;
@@ -79,12 +98,14 @@ const Loading = styled.div`text-align: center; padding: 60px; color: #657786; fo
 
 const MutualBadge = styled.span`
   background: #059669; color: white; font-size: 11px; font-weight: 600;
-  padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+  padding: 2px 8px; border-radius: 10px;
+  white-space: nowrap;
 `;
 
 const FollowsYouBadge = styled.span`
   background: #1DA1F2; color: white; font-size: 11px; font-weight: 600;
-  padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+  padding: 2px 8px; border-radius: 10px;
+  white-space: nowrap;
 `;
 
 const PublicProfile = () => {

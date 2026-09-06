@@ -136,6 +136,25 @@ const LoadMoreButton = styled.button`
   &:hover { background: #F7F9FA; } &:disabled { color: #AAB8C2; cursor: not-allowed; }
 `;
 
+const MobileFilterButton = styled.button`
+  display: none; width: 100%; padding: 12px; background: white; border: 1px solid #E1E8ED;
+  border-radius: 12px; color: #1DA1F2; font-weight: 700; font-size: 15px; cursor: pointer;
+  margin-bottom: 12px; text-align: center;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const MobileFilters = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: ${p => p.$open ? 'block' : 'none'};
+    margin-bottom: 12px;
+  }
+`;
+
 const Feed = () => {
   const { user } = useAuth();
   const [news, setNews] = useState([]);
@@ -150,6 +169,7 @@ const Feed = () => {
   const [feedTab, setFeedTab] = useState('for-you');
   const [followingNews, setFollowingNews] = useState([]);
   const [loadingFollowing, setLoadingFollowing] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const nextPageRef = useRef(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -263,6 +283,46 @@ const Feed = () => {
           <Tab $active={feedTab === 'trending'} onClick={() => setFeedTab('trending')}>Trending</Tab>
           <Tab $active={feedTab === 'following'} onClick={() => setFeedTab('following')}>Following</Tab>
         </TabsContainer>
+
+        <MobileFilterButton onClick={() => setShowMobileFilters(prev => !prev)}>
+          {showMobileFilters ? 'Hide Filters' : 'Filters'}
+        </MobileFilterButton>
+
+        <MobileFilters $open={showMobileFilters}>
+          <TopicsContainer style={{ marginBottom: 12 }}>
+            <TopicsTitle>Trending Topics</TopicsTitle>
+            <TopicItem $active={!selectedTopic} onClick={() => handleTopicFilter('')}>
+              <TopicName>All Topics</TopicName>
+            </TopicItem>
+            {topics.map(topic => (
+              <TopicItem
+                key={topic.id}
+                $active={selectedTopic === topic.id.toString()}
+                onClick={() => handleTopicFilter(topic.id.toString())}
+              >
+                <TopicName>{topic.name}</TopicName>
+              </TopicItem>
+            ))}
+          </TopicsContainer>
+          <TopicsContainer style={{ marginBottom: 12 }}>
+            <TopicsTitle>Filter by Bias</TopicsTitle>
+            <TopicItem $active={biasFilter === 'all'} onClick={() => setBiasFilter('all')}>
+              <TopicName>All Sources</TopicName>
+            </TopicItem>
+            {Object.entries(BIAS_CONFIG).map(([key, cfg]) => (
+              <TopicItem
+                key={key}
+                $active={biasFilter === key}
+                onClick={() => setBiasFilter(key)}
+              >
+                <TopicName>
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: cfg.color, marginRight: 8 }} />
+                  {cfg.label}
+                </TopicName>
+              </TopicItem>
+            ))}
+          </TopicsContainer>
+        </MobileFilters>
 
         {feedTab === 'following' && (
           loadingFollowing ? (

@@ -126,6 +126,14 @@ const SubmitButton = styled.button`
   }
 `;
 
+const SourceRow = styled.div`
+  display: flex; gap: 12px; margin-bottom: 16px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+`;
+
 const TopicSelect = styled.select`
   border: 1px solid #E1E8ED;
   border-radius: 8px;
@@ -252,11 +260,10 @@ const NewsForm = ({ onNewsCreated }) => {
           ))}
         </TopicSelect>
 
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <SourceRow>
           <TopicSelect
             value={selectedSource}
             onChange={(e) => setSelectedSource(e.target.value)}
-            style={{ flex: 1 }}
           >
             <option value="">Select source (optional)</option>
             {sources.map(s => (
@@ -273,7 +280,7 @@ const NewsForm = ({ onNewsCreated }) => {
               fontSize: 14, outline: 'none',
             }}
           />
-        </div>
+        </SourceRow>
 
         <TextArea
           value={content}

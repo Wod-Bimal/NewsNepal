@@ -41,6 +41,10 @@ const Logo = styled.h1`
   font-size: 48px;
   color: #1DA1F2;
   margin-bottom: 12px;
+
+  @media (max-width: 480px) {
+    font-size: 34px;
+  }
 `;
 
 const Tagline = styled.h2`
@@ -200,6 +204,11 @@ const Features = styled.div`
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid #E1E8ED;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 `;
 
 const Feature = styled.div`

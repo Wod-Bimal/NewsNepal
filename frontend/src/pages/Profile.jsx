@@ -11,6 +11,10 @@ const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
 const Card = styled.div`
   background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px;
   border: 1px solid #E1E8ED;
+
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
 `;
 
 const ProfileTop = styled.div`
@@ -22,6 +26,10 @@ const AvatarWrap = styled.div`position: relative; flex-shrink: 0;`;
 const Avatar = styled.img`
   width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
   border: 4px solid #1DA1F2; cursor: pointer;
+
+  @media (max-width: 480px) {
+    width: 80px; height: 80px; border-width: 3px;
+  }
 `;
 
 const AvatarOverlay = styled.div`

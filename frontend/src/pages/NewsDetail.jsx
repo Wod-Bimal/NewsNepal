@@ -7,14 +7,20 @@ import styled from 'styled-components';
 import { FaHeart, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
 import { BIAS_CONFIG } from '../utils/constants.js';
 
-const Container = styled.div`max-width: 700px; margin: 0 auto; padding: 20px;`;
+const Container = styled.div`max-width: 700px; margin: 0 auto; padding: 20px;
+
+  @media (max-width: 480px) { padding: 12px; }
+`;
 
 const BackBtn = styled.button`
   background: none; border: none; color: #1DA1F2; cursor: pointer; font-size: 16px;
   font-weight: 600; padding: 8px 0; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
 `;
 
-const Card = styled.div`background: white; border-radius: 12px; padding: 32px; border: 1px solid #E1E8ED;`;
+const Card = styled.div`background: white; border-radius: 12px; padding: 32px; border: 1px solid #E1E8ED;
+
+  @media (max-width: 480px) { padding: 18px; }
+`;
 
 const Header = styled.div`display: flex; align-items: center; margin-bottom: 16px;`;
 
