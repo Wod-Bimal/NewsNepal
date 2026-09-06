@@ -16,28 +16,41 @@ const NewsContainer = styled.div`
   transition: box-shadow 0.3s ease;
   cursor: pointer;
   &:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+
+  @media (max-width: 480px) {
+    padding: 14px;
+  }
 `;
 
 const NewsHeader = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 `;
 
 const Avatar = styled.img`
   width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 12px;
+  flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    width: 40px; height: 40px;
+  }
 `;
 
-const UserInfo = styled.div`flex: 1;`;
+const UserInfo = styled.div`flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap;`;
 
 const Username = styled.span`
   font-weight: 600; color: #14171A; margin-right: 8px; cursor: pointer;
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: inline-block; vertical-align: middle;
   &:hover { text-decoration: underline; color: #1DA1F2; }
 `;
 
 const Topic = styled.span`
-  background: ${props => props.color || '#1DA1F2'}; color: white; padding: 4px 8px;
+  background: ${props => props.$color || '#1DA1F2'}; color: white; padding: 4px 8px;
   border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px;
+  max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 `;
 
 const Timestamp = styled.span`color: #657786; font-size: 14px;`;
@@ -47,24 +60,24 @@ const NewsContent = styled.div`margin-bottom: 16px; line-height: 1.5; color: #14
 const SourceBadge = styled.a`
   display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
   padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
-  color: ${props => props.biasColor || '#657786'};
-  background: ${props => props.biasColor ? props.biasColor + '15' : '#F7F9FA'};
+  color: ${props => props.$biasColor || '#657786'};
+  background: ${props => props.$biasColor ? props.$biasColor + '15' : '#F7F9FA'};
   margin-bottom: 8px; margin-top: 4px; width: fit-content;
   &:hover { opacity: 0.8; }
 `;
 
 const BiasIndicator = styled.span`
   display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-  background: ${props => props.color || '#9CA3AF'};
+  background: ${props => props.$color || '#9CA3AF'};
 `;
 
 const BiasVoteButton = styled.button`
-  background: ${props => props.$active ? props.color + '20' : 'transparent'};
-  color: ${props => props.$active ? props.color : '#657786'};
-  border: 1px solid ${props => props.$active ? props.color : '#E1E8ED'};
+  background: ${props => props.$active ? props.$color + '20' : 'transparent'};
+  color: ${props => props.$active ? props.$color : '#657786'};
+  border: 1px solid ${props => props.$active ? props.$color : '#E1E8ED'};
   border-radius: 12px; padding: 2px 8px; font-size: 11px; cursor: pointer;
   font-weight: 600; transition: all 0.2s;
-  &:hover { border-color: ${props => props.color}; color: ${props => props.color}; }
+  &:hover { border-color: ${props => props.$color}; color: ${props => props.$color}; }
 `;
 
 const BiasRow = styled.div`
@@ -75,6 +88,11 @@ const NewsImage = styled.img`width: 100%; max-width: 500px; border-radius: 8px; 
 
 const NewsActions = styled.div`
   display: flex; align-items: center; gap: 20px; padding-top: 12px; border-top: 1px solid #F7F9FA;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -227,7 +245,7 @@ const NewsCard = ({ newsItem, onUpdate }) => {
           <Username onClick={(e) => { e.stopPropagation(); navigate(`/users/${newsItem.author.id}`); }}>
             {newsItem.author.username}
           </Username>
-          {newsItem.topic && <Topic color={newsItem.topic.color}>{newsItem.topic.name}</Topic>}
+          {newsItem.topic && <Topic $color={newsItem.topic.color}>{newsItem.topic.name}</Topic>}
         </UserInfo>
         <Timestamp>{formatDate(newsItem.created_at)}</Timestamp>
         {isAuthenticated && user?.id === newsItem.author.id && (
@@ -242,10 +260,10 @@ const NewsCard = ({ newsItem, onUpdate }) => {
           href={source.website_url}
           target="_blank"
           rel="noopener noreferrer"
-          biasColor={biasColor}
+          $biasColor={biasColor}
           onClick={(e) => e.stopPropagation()}
         >
-          <BiasIndicator color={biasColor} />
+          <BiasIndicator $color={biasColor} />
           {source.name}
           <span style={{ opacity: 0.7 }}>({source.bias_label})</span>
         </SourceBadge>
@@ -261,7 +279,7 @@ const NewsCard = ({ newsItem, onUpdate }) => {
             <BiasVoteButton
               key={opt.key}
               $active={userBias === opt.key}
-              color={BIAS_CONFIG[opt.key].color}
+              $color={BIAS_CONFIG[opt.key].color}
               onClick={(e) => { e.stopPropagation(); handleBiasVote(opt.key); }}
             >
               {opt.label}
