@@ -11,12 +11,17 @@ const BackLink = styled.button`
   &:hover { text-decoration: underline; }
 `;
 
+const Title = styled.h1`
+  color: #14171A; font-size: 24px; margin-bottom: 20px;
+`;
+
 const CreatePost = () => {
   const navigate = useNavigate();
 
   return (
     <Container>
       <BackLink onClick={() => navigate(-1)}>← Back</BackLink>
+      <Title>Create a Post</Title>
       <NewsForm onNewsCreated={() => navigate('/feed')} />
     </Container>
   );
