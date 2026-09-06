@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import styled from 'styled-components';
-import NewsForm from '../components/NewsForm.jsx';
 import NewsCard from '../components/NewsCard.jsx';
 import { newsService, topicService, sourceService, userService } from '../services/api.js';
 import { BIAS_CONFIG } from '../utils/constants.js';
@@ -217,10 +216,6 @@ const Feed = () => {
     fetchSources();
   }, [fetchNews, fetchTopics, fetchSources]);
 
-  const handleNewsCreated = () => {
-    fetchNews();
-  };
-
   const fetchFollowingFeed = useCallback(async () => {
     setLoadingFollowing(true);
     try {
@@ -338,9 +333,6 @@ const Feed = () => {
         )}
 
         {feedTab === 'following' && followingNews.length > 0 && null}
-
-        <NewsForm onNewsCreated={handleNewsCreated} />
-
         <SearchContainer>
           <SearchInput
             type="text"
