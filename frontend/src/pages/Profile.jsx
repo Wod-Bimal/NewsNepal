@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
 import FollowListModal from '../components/FollowListModal.jsx';
 import { newsService, authService } from '../services/api.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
 
@@ -97,6 +98,7 @@ const Empty = styled.div`text-align: center; padding: 40px; color: #657786;`;
 
 const Profile = () => {
   const { user, updateProfile, refreshUser } = useAuth();
+  useDocumentTitle('Profile');
   const { showSuccess, showError } = useNotification();
   const fileInputRef = useRef(null);
 

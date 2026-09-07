@@ -6,6 +6,7 @@ import { newsService, commentService } from '../services/api.js';
 import styled from 'styled-components';
 import { FaHeart, FaArrowLeft, FaPaperPlane } from 'react-icons/fa';
 import { BIAS_CONFIG } from '../utils/constants.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Container = styled.div`max-width: 700px; margin: 0 auto; padding: 20px;
 
@@ -69,6 +70,7 @@ const NewsDetail = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useNotification();
+  useDocumentTitle(news?.title || 'News');
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');

@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import NewsForm from '../components/NewsForm.jsx';
 import { useNavigate } from 'react-router-dom';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Container = styled.div`max-width: 700px; margin: 0 auto; padding: 20px;`;
 
@@ -17,6 +18,7 @@ const Title = styled.h1`
 
 const CreatePost = () => {
   const navigate = useNavigate();
+  useDocumentTitle('Create Post');
 
   return (
     <Container>
