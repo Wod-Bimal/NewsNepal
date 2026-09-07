@@ -10,6 +10,7 @@ import { threadService } from '../services/api.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import { formatMessageTime } from '../utils/chatHelpers.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Page = styled.div`
   max-width: 800px;
@@ -106,6 +107,7 @@ const ArticleDiscussion = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { showError } = useNotification();
+  useDocumentTitle('Discussion');
 
   const [thread, setThread] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -145,15 +147,7 @@ const ArticleDiscussion = () => {
   }, [lastMessage]);
 
   const handleSend = (content) => {
-    const sent = sendMessage({ type: 'message', content });
-    if (sent) {
-      threadService.postMessage(id, { content }).then(res => {
-        setMessages(prev => {
-          if (prev.some(m => m.id === res.data.id)) return prev;
-          return [...prev, res.data];
-        });
-      }).catch(() => {});
-    }
+    sendMessage({ type: 'message', content });
   };
 
   const handleTyping = (isTyping) => {

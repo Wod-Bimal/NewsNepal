@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import styled from 'styled-components';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const RegisterContainer = styled.div`
   max-width: 400px;
@@ -99,6 +100,7 @@ const ErrorMessage = styled.div`
 `;
 
 const Register = () => {
+  useDocumentTitle('Register');
   const [formData, setFormData] = useState({
     username: '',
     email: '',

@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { authService, newsService } from '../services/api.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -23,14 +24,14 @@ const Breadcrumb = styled.div`
   color: #657786;
   margin-bottom: 12px;
 
-  a { color: #1da1f2; text-decoration: none; font-weight: 600; }
+  a { color: #1DA1F2; text-decoration: none; font-weight: 600; }
   a:hover { text-decoration: underline; }
 `;
 
 const PageTitle = styled.h1`
   margin: 0 0 4px;
   font-size: 26px;
-  color: #14171a;
+  color: #14171A;
 `;
 
 const PageSubtitle = styled.p`
@@ -40,7 +41,7 @@ const PageSubtitle = styled.p`
 `;
 
 const HeroCard = styled.div`
-  background: linear-gradient(135deg, #1da1f2 0%, #0f69b4 100%);
+  background: linear-gradient(135deg, #1DA1F2 0%, #0F69B4 100%);
   border-radius: 20px;
   padding: 24px 28px;
   color: white;
@@ -112,7 +113,7 @@ const ActionRow = styled.div`
 
 const PrimaryAction = styled(Link)`
   background: white;
-  color: #1da1f2;
+  color: #1DA1F2;
   padding: 10px 16px;
   border-radius: 999px;
   text-decoration: none;
@@ -154,7 +155,7 @@ const StatsGrid = styled.div`
 
 const StatCard = styled.div`
   background: white;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #E1E8ED;
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 8px 20px rgba(20, 23, 26, 0.04);
@@ -179,7 +180,7 @@ const StatIcon = styled.div`
   justify-content: center;
   font-size: 20px;
   background: ${p => p.$bg || '#EBF5FF'};
-  color: ${p => p.$color || '#1da1f2'};
+  color: ${p => p.$color || '#1DA1F2'};
 `;
 
 const StatBody = styled.div`
@@ -189,7 +190,7 @@ const StatBody = styled.div`
 const StatValue = styled.div`
   font-size: 26px;
   font-weight: 800;
-  color: #14171a;
+  color: #14171A;
   line-height: 1.1;
 `;
 
@@ -200,7 +201,7 @@ const StatLabel = styled.div`
 `;
 
 const StatMeta = styled.div`
-  color: #9ca3af;
+  color: #9CA3AF;
   font-size: 12px;
   margin-top: 2px;
 `;
@@ -217,7 +218,7 @@ const Grid = styled.div`
 
 const Card = styled.div`
   background: white;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #E1E8ED;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 8px 20px rgba(20, 23, 26, 0.04);
@@ -240,7 +241,7 @@ const SectionHeader = styled.div`
 const SectionTitle = styled.h2`
   margin: 0;
   font-size: 17px;
-  color: #14171a;
+  color: #14171A;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -248,7 +249,7 @@ const SectionTitle = styled.h2`
 
 const ViewAll = styled(Link)`
   font-size: 13px;
-  color: #1da1f2;
+  color: #1DA1F2;
   font-weight: 600;
   text-decoration: none;
   display: inline-flex;
@@ -265,18 +266,18 @@ const List = styled.div`
 `;
 
 const ActivityItem = styled.div`
-  border: 1px solid #f0f2f5;
+  border: 1px solid #F0F2F5;
   border-radius: 12px;
   padding: 12px 14px;
-  background: #fcfdff;
+  background: #FCFDFF;
   transition: border-color 0.15s;
 
-  &:hover { border-color: #d7e7f7; }
+  &:hover { border-color: #D7E7F7; }
 `;
 
 const ActivityTitle = styled.div`
   font-weight: 700;
-  color: #14171a;
+  color: #14171A;
   margin-bottom: 4px;
   line-height: 1.4;
   display: -webkit-box;
@@ -303,7 +304,7 @@ const Chip = styled.span`
   gap: 4px;
   font-size: 12px;
   color: #657786;
-  background: #f0f4f8;
+  background: #F0F4F8;
   padding: 2px 8px;
   border-radius: 999px;
 `;
@@ -311,7 +312,7 @@ const Chip = styled.span`
 const EmptyState = styled.div`
   padding: 18px 16px;
   border-radius: 12px;
-  background: #f7f9fa;
+  background: #F7F9FA;
   color: #657786;
   text-align: center;
   font-size: 14px;
@@ -343,14 +344,14 @@ const BarCol = styled.div`
 const BarValue = styled.div`
   font-size: 14px;
   font-weight: 800;
-  color: #14171a;
+  color: #14171A;
 `;
 
 const BarTrack = styled.div`
   width: 46px;
   max-width: 100%;
   height: 100px;
-  background: #eff3f6;
+  background: #EFF3F6;
   border-radius: 8px;
   display: flex;
   align-items: flex-end;
@@ -360,7 +361,7 @@ const BarTrack = styled.div`
 const BarFill = styled.div`
   width: 100%;
   height: ${p => p.$height || 0}%;
-  background: linear-gradient(180deg, ${p => p.$color || '#1da1f2'} 0%, ${p => p.$colorDark || '#0f69b4'} 100%);
+  background: linear-gradient(180deg, ${p => p.$color || '#1DA1F2'} 0%, ${p => p.$colorDark || '#0F69B4'} 100%);
   border-radius: 8px 8px 0 0;
   transition: height 0.5s ease;
 `;
@@ -373,7 +374,7 @@ const BarLabel = styled.div`
 
 const ProfileReach = styled.div`
   background: white;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #E1E8ED;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 8px 20px rgba(20, 23, 26, 0.04);
@@ -389,7 +390,7 @@ const ReachText = styled.div``;
 
 const ReachTitle = styled.div`
   font-weight: 800;
-  color: #14171a;
+  color: #14171A;
   font-size: 15px;
   margin-bottom: 4px;
 `;
@@ -411,7 +412,7 @@ const ReachItem = styled.div`
 const ReachNum = styled.div`
   font-size: 20px;
   font-weight: 800;
-  color: #14171a;
+  color: #14171A;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -423,7 +424,7 @@ const ReachLabel = styled.div`
 `;
 
 const Skeleton = styled.div`
-  background: linear-gradient(90deg, #eef1f4 25%, #f6f8fa 37%, #eef1f4 63%);
+  background: linear-gradient(90deg, #EEF1F4 25%, #F6F8FA 37%, #EEF1F4 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: 10px;
@@ -439,6 +440,7 @@ const Skeleton = styled.div`
 
 const Dashboard = () => {
   const { user } = useAuth();
+  useDocumentTitle('Dashboard');
   const [stats, setStats] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
   const [recentComments, setRecentComments] = useState([]);
@@ -490,8 +492,8 @@ const Dashboard = () => {
 
   const s = stats || {};
   const engagement = [
-    { label: 'Likes', value: s.total_likes_received ?? 0, color: '#e0245e', colorDark: '#b01e4b', icon: FiHeart },
-    { label: 'Comments', value: s.comments_made ?? 0, color: '#1da1f2', colorDark: '#0f69b4', icon: FiMessageSquare },
+    { label: 'Likes', value: s.total_likes_received ?? 0, color: '#E0245E', colorDark: '#B01E4B', icon: FiHeart },
+    { label: 'Comments', value: s.comments_made ?? 0, color: '#1DA1F2', colorDark: '#0F69B4', icon: FiMessageSquare },
     { label: 'Bias votes', value: s.bias_votes ?? 0, color: '#059669', colorDark: '#047857', icon: FiAward },
   ];
   const maxEngagement = Math.max(1, ...engagement.map(e => e.value));
@@ -552,7 +554,7 @@ const Dashboard = () => {
       ) : (
         <StatsGrid>
           <StatCard>
-            <StatIcon $bg="#EBF5FF" $color="#1da1f2"><FiBookOpen /></StatIcon>
+            <StatIcon $bg="#EBF5FF" $color="#1DA1F2"><FiBookOpen /></StatIcon>
             <StatBody>
               <StatValue>{s.news_count ?? 0}</StatValue>
               <StatLabel>Posts</StatLabel>
@@ -560,7 +562,7 @@ const Dashboard = () => {
             </StatBody>
           </StatCard>
           <StatCard>
-            <StatIcon $bg="#FDF0F4" $color="#e0245e"><FiHeart /></StatIcon>
+            <StatIcon $bg="#FDF0F4" $color="#E0245E"><FiHeart /></StatIcon>
             <StatBody>
               <StatValue>{s.total_likes_received ?? 0}</StatValue>
               <StatLabel>Likes received</StatLabel>
@@ -568,7 +570,7 @@ const Dashboard = () => {
             </StatBody>
           </StatCard>
           <StatCard>
-            <StatIcon $bg="#EBF5FF" $color="#1da1f2"><FiMessageSquare /></StatIcon>
+            <StatIcon $bg="#EBF5FF" $color="#1DA1F2"><FiMessageSquare /></StatIcon>
             <StatBody>
               <StatValue>{s.comments_made ?? 0}</StatValue>
               <StatLabel>Comments</StatLabel>
@@ -576,7 +578,7 @@ const Dashboard = () => {
             </StatBody>
           </StatCard>
           <StatCard>
-            <StatIcon $bg="#F0F6FF" $color="#2563eb"><FiTrendingUp /></StatIcon>
+            <StatIcon $bg="#F0F6FF" $color="#2563EB"><FiTrendingUp /></StatIcon>
             <StatBody>
               <StatValue>{s.news_liked ?? 0}</StatValue>
               <StatLabel>Liked news</StatLabel>
@@ -592,7 +594,7 @@ const Dashboard = () => {
             </StatBody>
           </StatCard>
           <StatCard>
-            <StatIcon $bg="#F5F3FF" $color="#7c3aed"><FiUserPlus /></StatIcon>
+            <StatIcon $bg="#F5F3FF" $color="#7C3AED"><FiUserPlus /></StatIcon>
             <StatBody>
               <StatValue>{s.following_count ?? 0}</StatValue>
               <StatLabel>Following</StatLabel>

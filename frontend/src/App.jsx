@@ -18,6 +18,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Messages from './pages/Messages.jsx';
 import ArticleDiscussion from './pages/ArticleDiscussion.jsx';
 import PublicProfile from './pages/PublicProfile.jsx';
+import NotFound from './pages/NotFound.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import './App.css';
 
@@ -102,6 +103,7 @@ function App() {
                           </ProtectedRoute>
                         } 
                       />
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>
                 </div>

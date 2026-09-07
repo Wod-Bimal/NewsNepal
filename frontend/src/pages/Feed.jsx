@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import NewsCard from '../components/NewsCard.jsx';
 import { newsService, topicService, sourceService, userService } from '../services/api.js';
 import { BIAS_CONFIG } from '../utils/constants.js';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const TabsContainer = styled.div`
   display: flex;
@@ -156,6 +157,7 @@ const MobileFilters = styled.div`
 
 const Feed = () => {
   const { user } = useAuth();
+  useDocumentTitle('Feed');
   const [news, setNews] = useState([]);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -382,7 +384,7 @@ const Feed = () => {
         {user?.is_staff && (
           <div style={{ marginBottom: '20px' }}>
             <a
-              href="http://localhost:8000/admin/"
+              href="/admin/"
               target="_blank"
               rel="noopener noreferrer"
               style={{

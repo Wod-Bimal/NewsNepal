@@ -7,6 +7,7 @@ import NewsCard from '../components/NewsCard.jsx';
 import FollowListModal from '../components/FollowListModal.jsx';
 import { userService, conversationService } from '../services/api.js';
 import { FaArrowLeft, FaEnvelope, FaUserPlus, FaUserCheck, FaUserMinus } from 'react-icons/fa';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
 
 const Container = styled.div`max-width: 900px; margin: 0 auto; padding: 20px;`;
 
@@ -113,6 +114,7 @@ const PublicProfile = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { showSuccess, showError } = useNotification();
+  useDocumentTitle(profile?.username ? `${profile.username}'s Profile` : 'Profile');
 
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);

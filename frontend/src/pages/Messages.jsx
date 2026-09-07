@@ -10,6 +10,8 @@ import { useWebSocket } from '../hooks/useWebSocket.js';
 import { conversationService } from '../services/api.js';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
+import useDocumentTitle from '../hooks/useDocumentTitle.js';
+import { FaPlus } from 'react-icons/fa';
 
 const Page = styled.div`
   display: flex;
@@ -119,9 +121,43 @@ const EmptyChat = styled.div`
   padding: 40px;
 `;
 
+const SidebarHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #E1E8ED;
+`;
+
+const SidebarTitle = styled.div`
+  font-weight: 700;
+  font-size: 17px;
+  color: #14171A;
+`;
+
+const NewConversationBtn = styled.button`
+  background: #1DA1F2;
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #1a91da;
+  }
+`;
+
 const Messages = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  useDocumentTitle('Messages');
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
@@ -254,6 +290,12 @@ const Messages = () => {
   return (
     <Page>
       <Sidebar $show={!isMobile || !activeConv}>
+        <SidebarHeader>
+          <SidebarTitle>Messages</SidebarTitle>
+          <NewConversationBtn onClick={() => setShowNewModal(true)}>
+            <FaPlus /> New
+          </NewConversationBtn>
+        </SidebarHeader>
         <ConversationList
           conversations={conversations}
           activeId={activeConv?.id}
