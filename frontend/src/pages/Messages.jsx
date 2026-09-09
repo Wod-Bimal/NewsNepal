@@ -249,18 +249,16 @@ const Messages = () => {
 
     if (lastMessage.type === 'message' && lastMessage.message) {
       const msg = lastMessage.message;
-      if (msg.conversation === activeConv?.id || (activeConv && msg.author?.id !== user?.id)) {
+      const msgConvId = msg.conversation != null ? Number(msg.conversation) : null;
+      if (activeConv && msgConvId === activeConv.id) {
         setMessages(prev => {
           if (prev.some(m => m.id === msg.id)) return prev;
-          return [...prev, msg];
+          return [msg, ...prev];
         });
-        if (msg.author?.id !== user?.id) {
-          markRead();
-          fetchConversations();
-        }
       }
+      fetchConversations();
       if (msg.author?.id !== user?.id) {
-        fetchConversations();
+        markRead();
       }
     } else if (lastMessage.type === 'typing') {
       if (lastMessage.is_typing) {

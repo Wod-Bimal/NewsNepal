@@ -70,12 +70,12 @@ const NewsDetail = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useNotification();
-  useDocumentTitle(news?.title || 'News');
   const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [comments, setComments] = useState([]);
+  useDocumentTitle(news?.title || 'News');
 
   useEffect(() => {
     loadNews();
