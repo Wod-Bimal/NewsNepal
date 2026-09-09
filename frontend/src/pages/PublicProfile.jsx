@@ -114,7 +114,6 @@ const PublicProfile = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { showSuccess, showError } = useNotification();
-  useDocumentTitle(profile?.username ? `${profile.username}'s Profile` : 'Profile');
 
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -122,6 +121,7 @@ const PublicProfile = () => {
   const [followLoading, setFollowLoading] = useState(false);
   const [tab, setTab] = useState('posts');
   const [showFollowModal, setShowFollowModal] = useState(null);
+  useDocumentTitle(profile?.username ? `${profile.username}'s Profile` : 'Profile');
 
   const isOwnProfile = currentUser?.id === parseInt(id);
 

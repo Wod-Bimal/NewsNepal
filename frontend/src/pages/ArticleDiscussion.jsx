@@ -139,7 +139,7 @@ const ArticleDiscussion = () => {
       const msg = lastMessage.message;
       setMessages(prev => {
         if (prev.some(m => m.id === msg.id)) return prev;
-        return [...prev, msg];
+        return [msg, ...prev];
       });
     } else if (lastMessage.type === 'typing') {
       setTypingUser(lastMessage.is_typing ? lastMessage.user : null);
