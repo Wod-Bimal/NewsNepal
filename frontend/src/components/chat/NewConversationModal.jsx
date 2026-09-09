@@ -202,7 +202,7 @@ const NewConversationModal = ({ onClose, onCreated }) => {
     }
     setSearching(true);
     try {
-      const res = await conversationService.searchUsers(q);
+      const res = await conversationService.searchUsers(q, true);
       setUsers(res.data);
     } catch {
       setUsers([]);
@@ -228,8 +228,9 @@ const NewConversationModal = ({ onClose, onCreated }) => {
       const res = await conversationService.createConversation(data);
       onCreated(res.data);
       onClose();
-    } catch {
-      showError('Failed to create conversation');
+    } catch (err) {
+      const detail = err?.response?.data?.error || 'Failed to create conversation';
+      showError(detail);
     }
     setCreating(false);
   };
