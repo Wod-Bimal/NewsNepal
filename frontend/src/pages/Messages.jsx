@@ -206,8 +206,9 @@ const Messages = () => {
           });
           const conv = res.data;
           navigate(`/messages/${conv.id}`, { replace: true });
-        } catch {
-          showError('Failed to start conversation');
+        } catch (err) {
+          const detail = err?.response?.data?.error || 'Failed to start conversation';
+          showError(detail);
         }
       };
       startConversation();
