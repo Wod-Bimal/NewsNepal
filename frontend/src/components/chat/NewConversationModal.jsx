@@ -202,7 +202,7 @@ const NewConversationModal = ({ onClose, onCreated }) => {
     }
     setSearching(true);
     try {
-      const res = await conversationService.searchUsers(q, true);
+      const res = await conversationService.searchUsers(q);
       setUsers(res.data);
     } catch {
       setUsers([]);
@@ -211,9 +211,15 @@ const NewConversationModal = ({ onClose, onCreated }) => {
   };
 
   const toggleUser = (userId) => {
-    setSelected(prev =>
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-    );
+    setSelected(prev => {
+      const next = prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId];
+      // 2+ recipients always becomes a group conversation.
+      if (next.length > 1) setIsGroup(true);
+      else setIsGroup(false);
+      return next;
+    });
   };
 
   const handleCreate = async () => {
@@ -260,9 +266,13 @@ const NewConversationModal = ({ onClose, onCreated }) => {
             <input
               type="checkbox"
               checked={isGroup}
+              disabled={selected.length > 1}
               onChange={e => setIsGroup(e.target.checked)}
             />
             <FaUsers /> Group chat
+            {selected.length > 1 && (
+              <span style={{ fontSize: 11, color: '#AAB8C2' }}>(auto-enabled for 2+ users)</span>
+            )}
           </ToggleLabel>
           {isGroup && (
             <input
