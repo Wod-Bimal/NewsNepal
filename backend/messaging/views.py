@@ -9,6 +9,8 @@ from .serializers import (
     CreateConversationSerializer, MessageSerializer,
     ArticleThreadSerializer, ThreadMessageSerializer
 )
+from notifications.models import Notification
+from notifications.utils import notify
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -107,6 +109,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
         conversation.save()
 
+        participant_ids = ConversationParticipant.objects.filter(
+            conversation=conversation
+        ).exclude(user=request.user).values_list('user_id', flat=True)
+        for uid in participant_ids:
+            notify(
+                recipient_id=uid,
+                actor=request.user,
+                type=Notification.MESSAGE,
+                conversation_id=conversation.id,
+                content=content,
+            )
+
         return Response(
             MessageSerializer(msg).data,
             status=status.HTTP_201_CREATED
@@ -178,6 +192,14 @@ class ArticleThreadViewSet(viewsets.GenericViewSet):
         msg = ArticleThreadMessage.objects.create(
             thread=thread, author=request.user, content=content
         )
+        if news.author_id != request.user.id:
+            notify(
+                recipient_id=news.author_id,
+                actor=request.user,
+                type=Notification.THREAD_MESSAGE,
+                target_news_id=news.id,
+                content=content,
+            )
         return Response(ThreadMessageSerializer(msg).data, status=status.HTTP_201_CREATED)
 
 

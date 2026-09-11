@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { NotificationsProvider } from './contexts/NotificationsContext.jsx';
 import { NewsProvider } from './contexts/NewsContext.jsx';
 import { TopicProvider } from './contexts/TopicContext.jsx';
 import { NotificationProvider } from './contexts/NotificationContext.jsx';
@@ -27,89 +28,91 @@ function App() {
     <ErrorBoundary>
       <NotificationProvider>
         <AuthProvider>
-          <NewsProvider>
-            <TopicProvider>
-              <Router>
-                <div className="App">
-                  <Navbar />
-                  <main>
-                    <Routes>
-                      <Route path="/" element={<Landing />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route 
-                        path="/feed" 
-                        element={
-                          <ProtectedRoute>
-                            <Feed />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="/news/:id" element={<NewsDetail />} />
-                      <Route 
-                        path="/dashboard" 
-                        element={
-                          <ProtectedRoute>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/profile" 
-                        element={
-                          <ProtectedRoute>
-                            <Profile />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/create" 
-                        element={
-                          <ProtectedRoute>
-                            <CreatePost />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/messages" 
-                        element={
-                          <ProtectedRoute>
-                            <Messages />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/messages/:id" 
-                        element={
-                          <ProtectedRoute>
-                            <Messages />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/news/:id/discuss" 
-                        element={
-                          <ProtectedRoute>
-                            <ArticleDiscussion />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route 
-                        path="/users/:id" 
-                        element={
-                          <ProtectedRoute>
-                            <PublicProfile />
-                          </ProtectedRoute>
-                        } 
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                </div>
-              </Router>
-            </TopicProvider>
-          </NewsProvider>
+          <NotificationsProvider>
+            <NewsProvider>
+              <TopicProvider>
+                <Router>
+                  <div className="App">
+                    <Navbar />
+                    <main>
+                      <Routes>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route 
+                          path="/feed" 
+                          element={
+                            <ProtectedRoute>
+                              <Feed />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route path="/news/:id" element={<NewsDetail />} />
+                        <Route 
+                          path="/dashboard" 
+                          element={
+                            <ProtectedRoute>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/profile" 
+                          element={
+                            <ProtectedRoute>
+                              <Profile />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/create" 
+                          element={
+                            <ProtectedRoute>
+                              <CreatePost />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/messages" 
+                          element={
+                            <ProtectedRoute>
+                              <Messages />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/messages/:id" 
+                          element={
+                            <ProtectedRoute>
+                              <Messages />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/news/:id/discuss" 
+                          element={
+                            <ProtectedRoute>
+                              <ArticleDiscussion />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/users/:id" 
+                          element={
+                            <ProtectedRoute>
+                              <PublicProfile />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </main>
+                  </div>
+                </Router>
+              </TopicProvider>
+            </NewsProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </NotificationProvider>
     </ErrorBoundary>

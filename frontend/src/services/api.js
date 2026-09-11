@@ -150,4 +150,12 @@ export const userService = {
   getUserNews: (id) => api.get(API_ENDPOINTS.USERS.NEWS(id)),
 };
 
+// Notification services
+export const notificationService = {
+  getNotifications: (params) => api.get(API_ENDPOINTS.NOTIFICATIONS.LIST, { params }),
+  markRead: (id) => api.post(API_ENDPOINTS.NOTIFICATIONS.READ(id)),
+  markAllRead: () => api.post(API_ENDPOINTS.NOTIFICATIONS.READ_ALL),
+  getUnreadCount: () => api.get(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT),
+};
+
 export default api;

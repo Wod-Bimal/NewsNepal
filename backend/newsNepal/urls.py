@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/auth/', include('accounts.urls')),
     path('api/', include('tweets.urls')),
     path('api/', include('messaging.urls')),
+    path('api/notifications/', include('notifications.urls')),
     path('favicon.ico', lambda r: HttpResponse(status=204)),
 ]
 
