@@ -123,6 +123,7 @@ export const NotificationsProvider = ({ children }) => {
         openPanel,
         closePanel,
         fetchNotifications,
+        fetchUnreadCount,
         markRead,
         markAllRead,
       }}
