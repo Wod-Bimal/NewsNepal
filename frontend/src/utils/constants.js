@@ -52,6 +52,12 @@ export const API_ENDPOINTS = {
     FOLLOWING: (id) => `/api/auth/users/${id}/following/`,
     NEWS: (id) => `/api/auth/users/${id}/news/`,
   },
+  NOTIFICATIONS: {
+    LIST: '/api/notifications/',
+    READ: (id) => `/api/notifications/${id}/read/`,
+    READ_ALL: '/api/notifications/read-all/',
+    UNREAD_COUNT: '/api/notifications/unread-count/',
+  },
 };
 
 // App constants

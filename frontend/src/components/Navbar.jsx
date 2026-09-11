@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNotification } from '../contexts/NotificationContext.jsx';
 import { FaEnvelope, FaBars, FaTimes } from 'react-icons/fa';
 import styled from 'styled-components';
+import NotificationsBell from './NotificationsBell.jsx';
 
 const Nav = styled.nav`
   background: white;
@@ -168,6 +169,18 @@ const MobileOverlay = styled.div`
   }
 `;
 
+const RightGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const RightControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { showSuccess } = useNotification();
@@ -232,13 +245,18 @@ const Navbar = () => {
       <NavContainer>
         <Logo to={isAuthenticated ? "/feed" : "/"}>NewsNepal</Logo>
 
-        <Hamburger onClick={() => setMobileOpen(prev => !prev)}>
-          {mobileOpen ? <FaTimes /> : <FaBars />}
-        </Hamburger>
+        <RightGroup>
+          <NavLinks $open={mobileOpen}>
+            {renderLinks()}
+          </NavLinks>
 
-        <NavLinks $open={mobileOpen}>
-          {renderLinks()}
-        </NavLinks>
+          <RightControls>
+            {isAuthenticated && <NotificationsBell />}
+            <Hamburger onClick={() => setMobileOpen(prev => !prev)}>
+              {mobileOpen ? <FaTimes /> : <FaBars />}
+            </Hamburger>
+          </RightControls>
+        </RightGroup>
       </NavContainer>
       <MobileOverlay $open={mobileOpen} onClick={() => setMobileOpen(false)} />
     </Nav>

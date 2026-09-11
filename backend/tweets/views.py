@@ -5,6 +5,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 from .models import News, Topic, Comment, NewsSource, BiasVote
+from notifications.models import Notification
+from notifications.utils import notify
 from .serializers import (
     UserSerializer, RegisterSerializer, TopicSerializer,
     NewsSerializer, CommentSerializer, NewsSourceSerializer,
@@ -97,7 +99,17 @@ class NewsViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        news = serializer.save(author=self.request.user)
+        from accounts.models import Follow
+        follower_ids = Follow.objects.filter(following=self.request.user).values_list('follower_id', flat=True)
+        for follower_id in follower_ids:
+            notify(
+                recipient_id=follower_id,
+                actor=self.request.user,
+                type=Notification.POST,
+                target_news_id=news.id,
+                content=news.title[:300],
+            )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -108,7 +120,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(news_id=self.kwargs.get('news_pk')).select_related('author')
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, news_id=self.kwargs.get('news_pk'))
+        comment = serializer.save(author=self.request.user, news_id=self.kwargs.get('news_pk'))
+        notify(
+            recipient=comment.news.author,
+            actor=self.request.user,
+            type=Notification.COMMENT,
+            target_news=comment.news,
+            target_comment=comment,
+            content=comment.content,
+        )
 
     def get_permissions(self):
         if self.action == 'create':
@@ -156,6 +176,13 @@ def toggle_like(request, pk):
         news.likes.remove(request.user)
         return Response({'liked': False, 'count': news.like_count})
     news.likes.add(request.user)
+    notify(
+        recipient=news.author,
+        actor=request.user,
+        type=Notification.LIKE,
+        target_news=news,
+        content=news.title,
+    )
     return Response({'liked': True, 'count': news.like_count})
 
 

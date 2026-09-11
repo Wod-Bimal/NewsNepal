@@ -6,6 +6,8 @@ from django.contrib.auth import login, logout
 from django.db.models import Count
 from .models import User, Follow
 from .serializers import UserSerializer, UserPublicSerializer, UserRegistrationSerializer, LoginSerializer
+from notifications.models import Notification
+from notifications.utils import notify
 
 
 def serialize_user(user, request):
@@ -151,6 +153,13 @@ def follow_user(request, user_id):
     follow, created = Follow.objects.get_or_create(follower=request.user, following=target)
     if not created:
         return Response({'error': 'Already following'}, status=status.HTTP_400_BAD_REQUEST)
+
+    notify(
+        recipient=target,
+        actor=request.user,
+        type=Notification.FOLLOW,
+        content=f'{request.user.username} started following you',
+    )
 
     return Response({
         'status': 'following',

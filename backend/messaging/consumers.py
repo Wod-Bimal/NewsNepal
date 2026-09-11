@@ -2,6 +2,8 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
+from notifications.models import Notification
+from notifications.utils import notify
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -108,6 +110,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             updated_at=msg.created_at
         )
 
+        from .models import ConversationParticipant
+        participant_ids = ConversationParticipant.objects.filter(
+            conversation_id=self.conversation_id
+        ).exclude(user_id=self.user.id).values_list('user_id', flat=True)
+        for uid in participant_ids:
+            notify(
+                recipient_id=uid,
+                actor=self.user,
+                type=Notification.MESSAGE,
+                conversation_id=self.conversation_id,
+                content=content,
+            )
+
         shared_news_data = None
         if shared_news:
             shared_news_data = {'id': shared_news.id, 'title': shared_news.title}
@@ -200,6 +215,14 @@ class ArticleThreadConsumer(AsyncWebsocketConsumer):
         msg = ArticleThreadMessage.objects.create(
             thread=thread, author=self.user, content=content
         )
+        if news.author_id != self.user.id:
+            notify(
+                recipient_id=news.author_id,
+                actor=self.user,
+                type=Notification.THREAD_MESSAGE,
+                target_news_id=news.id,
+                content=content,
+            )
         return {
             'id': msg.id,
             'author': {

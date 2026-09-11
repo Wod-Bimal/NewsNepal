@@ -7,7 +7,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'newsNepal.settings')
 
 django_asgi_app = get_asgi_application()
 
-from messaging.routing import websocket_urlpatterns
+from messaging.routing import websocket_urlpatterns as messaging_ws
+from notifications.routing import websocket_urlpatterns as notification_ws
+
+websocket_urlpatterns = messaging_ws + notification_ws
 
 application = ProtocolTypeRouter({
     'http': django_asgi_app,
