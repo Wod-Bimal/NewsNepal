@@ -42,6 +42,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
         is_group = data.get('is_group', False)
         title = data.get('title', '')
 
+        # Selecting 2+ other users always means a group conversation.
+        if not is_group and len([uid for uid in participant_ids if uid != request.user.id]) > 1:
+            is_group = True
+            if not title:
+                from accounts.models import User
+                names = list(User.objects.filter(id__in=participant_ids).values_list('username', flat=True))
+                title = ', '.join(names)
+
         if not is_group:
             all_ids = list(set(participant_ids + [request.user.id]))
             if len(all_ids) == 2:
