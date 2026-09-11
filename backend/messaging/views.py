@@ -143,6 +143,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
         )
         participant.last_read_at = timezone.now()
         participant.save(update_fields=['last_read_at'])
+        Notification.objects.filter(
+            recipient=request.user,
+            conversation=conversation,
+            type=Notification.MESSAGE,
+            is_read=False,
+        ).update(is_read=True)
         return Response({'status': 'marked as read'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])

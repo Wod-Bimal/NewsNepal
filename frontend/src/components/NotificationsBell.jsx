@@ -190,7 +190,7 @@ const TYPE_TEXT = {
 
 const NotificationsBell = () => {
   const {
-    notifications, unreadCount, isOpen, openPanel, closePanel, markRead, markAllRead,
+    notifications, unreadCount, isOpen, openPanel, closePanel, markRead, markAllRead, fetchUnreadCount,
   } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
@@ -199,8 +199,9 @@ const NotificationsBell = () => {
     closePanel();
   }, [location.pathname, closePanel]);
 
-  const handleClick = (n) => {
-    markRead(n.id);
+  const handleClick = async (n) => {
+    await markRead(n.id);
+    fetchUnreadCount();
     closePanel();
     if (n.type === 'follow') {
       navigate(`/users/${n.actor?.id}`);

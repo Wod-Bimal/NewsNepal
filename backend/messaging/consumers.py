@@ -148,6 +148,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             conversation_id=self.conversation_id,
             user=self.user
         ).update(last_read_at=timezone.now())
+        Notification.objects.filter(
+            recipient=self.user,
+            conversation_id=self.conversation_id,
+            type=Notification.MESSAGE,
+            is_read=False,
+        ).update(is_read=True)
 
 
 class ArticleThreadConsumer(AsyncWebsocketConsumer):
