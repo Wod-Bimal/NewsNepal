@@ -6,28 +6,43 @@ import NewsCard from '../components/NewsCard.jsx';
 import { newsService, topicService } from '../services/api.js';
 
 const Container = styled.div`
-  min-height: calc(100vh - 60px);
-  background: linear-gradient(135deg, #F7F9FA 0%, #EAF2F8 100%);
-  padding: 40px 20px;
+  min-height: calc(100vh - 68px);
+  background:
+    radial-gradient(ellipse at 85% 2%, rgba(216, 233, 220, 0.62), transparent 34rem),
+    #f7f8f5;
+  padding: 52px 24px 72px;
+
+  @media (max-width: 600px) {
+    padding: 28px 16px 48px;
+  }
 `;
 
 const Content = styled.div`
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
 `;
 
 const Hero = styled.div`
-  background: white;
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e9e4;
+  border-radius: 28px;
+  padding: 56px;
+  box-shadow: 0 22px 60px rgba(27, 47, 37, 0.08);
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: 44px;
+  margin-bottom: 36px;
 
-  @media (min-width: 900px) {
+  @media (min-width: 860px) {
     grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  @media (max-width: 600px) {
+    border-radius: 22px;
+    padding: 30px 24px;
+    gap: 28px;
   }
 `;
 
@@ -38,91 +53,146 @@ const HeroCopy = styled.div`
 `;
 
 const Logo = styled.h1`
-  font-size: 48px;
-  color: #1DA1F2;
-  margin-bottom: 12px;
+  font-size: 37px;
+  letter-spacing: -1.6px;
+  line-height: 1.15;
+  color: #17241f;
+  margin-bottom: 16px;
 
   @media (max-width: 480px) {
-    font-size: 34px;
+    font-size: 30px;
   }
 `;
 
 const Tagline = styled.h2`
-  font-size: 32px;
-  color: #14171A;
-  line-height: 1.1;
-  margin-bottom: 20px;
+  max-width: 600px;
+  font-size: clamp(36px, 5vw, 58px);
+  letter-spacing: -2.7px;
+  color: #17241f;
+  line-height: 1.04;
+  margin-bottom: 22px;
+
+  @media (max-width: 480px) {
+    letter-spacing: -1.5px;
+  }
 `;
 
 const Description = styled.p`
-  color: #657786;
+  max-width: 570px;
+  color: #68766f;
   font-size: 17px;
-  line-height: 1.8;
-  margin-bottom: 28px;
+  line-height: 1.75;
+  margin-bottom: 30px;
+`;
+
+const Eyebrow = styled.p`
+  color: #16704f;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+  text-transform: uppercase;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+
+  @media (max-width: 480px) {
+    > a {
+      width: 100%;
+    }
+  }
 `;
 
 const PrimaryButton = styled(Link)`
-  background: #1DA1F2;
+  background: #16704f;
   color: white;
-  padding: 14px 22px;
-  border-radius: 30px;
+  padding: 14px 24px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 
-  &:hover { background: #1991DB; }
+  &:hover {
+    background: #10583e;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(22, 112, 79, 0.2);
+  }
 `;
 
 const SecondaryButton = styled(Link)`
   background: white;
-  color: #1DA1F2;
-  padding: 14px 22px;
-  border-radius: 30px;
+  color: #16704f;
+  padding: 13px 24px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   text-decoration: none;
-  border: 1px solid #1DA1F2;
+  border: 1px solid #c8dacf;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 
-  &:hover { background: #F7F9FA; }
+  &:hover {
+    background: #f0f5f1;
+    border-color: #9ebdaa;
+    transform: translateY(-2px);
+  }
 `;
 
 const HeroDetails = styled.div`
-  background: #F7FBFF;
-  border-radius: 20px;
-  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #edf5ef, #e4efe7);
+  border: 1px solid #dce9df;
+  border-radius: 22px;
+  padding: 34px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    right: -78px;
+    bottom: -96px;
+    border: 1px solid rgba(22, 112, 79, 0.14);
+    border-radius: 50%;
+    box-shadow: 0 0 0 22px rgba(22, 112, 79, 0.035), 0 0 0 46px rgba(22, 112, 79, 0.025);
+    pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    padding: 26px;
+  }
 `;
 
 const DetailHeading = styled.h3`
-  font-size: 20px;
-  margin-bottom: 18px;
-  color: #14171A;
+  font-size: 21px;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  color: #17241f;
 `;
 
 const DetailText = styled.p`
-  color: #657786;
-  line-height: 1.7;
+  color: #53665b;
+  font-size: 15px;
+  line-height: 1.8;
 `;
 
 const PreviewGrid = styled.div`
   display: grid;
-  gap: 20px;
+  gap: 24px;
   grid-template-columns: 1fr;
 
   @media (min-width: 900px) {
@@ -136,14 +206,15 @@ const NewsPreview = styled.div`
 `;
 
 const SectionHeading = styled.h3`
-  font-size: 24px;
-  color: #14171A;
+  font-size: 21px;
+  letter-spacing: -0.5px;
+  color: #17241f;
   margin-bottom: 16px;
 `;
 
 const NewsList = styled.div`
   display: grid;
-  gap: 18px;
+  gap: 16px;
 `;
 
 const Sidebar = styled.div`
@@ -155,12 +226,17 @@ const SidebarCard = styled.div`
   background: white;
   border-radius: 20px;
   padding: 24px;
-  border: 1px solid #E1E8ED;
+  border: 1px solid #e5e9e4;
+  box-shadow: 0 8px 24px rgba(27, 47, 37, 0.04);
+
+  @media (max-width: 600px) {
+    padding: 20px;
+  }
 `;
 
 const TopicsList = styled.div`
   display: grid;
-  gap: 10px;
+  gap: 8px;
 `;
 
 const TopicChip = styled(Link)`
@@ -169,31 +245,35 @@ const TopicChip = styled(Link)`
   justify-content: center;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #F7F9FC;
-  color: #14171A;
+  background: #f3f6f2;
+  color: #405248;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
-  &:hover { background: #E8F2FF; }
+  &:hover {
+    background: #e8f2ec;
+    color: #16704f;
+    transform: translateX(2px);
+  }
 `;
 
 const PreviewCard = styled.div`
   background: white;
   border-radius: 20px;
   padding: 24px;
-  border: 1px solid #E1E8ED;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e9e4;
+  box-shadow: 0 8px 24px rgba(27, 47, 37, 0.04);
 `;
 
 const PreviewTitle = styled.h4`
   font-size: 18px;
   margin-bottom: 12px;
-  color: #14171A;
+  color: #17241f;
 `;
 
 const PreviewText = styled.p`
-  color: #657786;
+  color: #68766f;
   line-height: 1.7;
 `;
 
@@ -203,7 +283,7 @@ const Features = styled.div`
   gap: 16px;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #E1E8ED;
+  border-top: 1px solid #e5e9e4;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -213,10 +293,17 @@ const Features = styled.div`
 
 const Feature = styled.div`
   background: white;
+  border: 1px solid #e5e9e4;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  text-align: center;
+  box-shadow: 0 8px 24px rgba(27, 47, 37, 0.04);
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(27, 47, 37, 0.08);
+  }
 `;
 
 const FeatureIcon = styled.div`
@@ -226,12 +313,12 @@ const FeatureIcon = styled.div`
 
 const FeatureText = styled.div`
   font-size: 14px;
-  color: #657786;
+  color: #68766f;
   font-weight: 600;
 `;
 
 const SmallNote = styled.p`
-  color: #657786;
+  color: #68766f;
   font-size: 14px;
   line-height: 1.7;
   margin-top: 12px;
@@ -239,11 +326,11 @@ const SmallNote = styled.p`
 
 const EmptyState = styled.div`
   background: #FFFFFF;
-  border: 1px solid #E1E8ED;
+  border: 1px solid #e5e9e4;
   border-radius: 20px;
   padding: 28px;
   text-align: center;
-  color: #657786;
+  color: #68766f;
 `;
 
 const Landing = () => {
@@ -289,6 +376,7 @@ const Landing = () => {
         <Content>
           <Hero>
             <HeroCopy>
+              <Eyebrow>Your daily briefing</Eyebrow>
               <Logo>Welcome back, {user?.first_name || user?.username || 'reader'}!</Logo>
               <Tagline>News matched to your interests and the latest trending stories.</Tagline>
               <Description>
@@ -360,6 +448,7 @@ const Landing = () => {
       <Content>
         <Hero>
           <HeroCopy>
+            <Eyebrow>Independent voices. A clearer picture.</Eyebrow>
             <Logo>📰 NewsNepal</Logo>
             <Tagline>Nepal's Unfiltered News Hub</Tagline>
             <Description>

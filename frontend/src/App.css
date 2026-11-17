@@ -1,6 +1,6 @@
 .App {
   min-height: 100vh;
-  background-color: #f7f9fa;
+  background-color: #f7f8f5;
 }
 
 .container {
@@ -15,28 +15,31 @@
   border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
 .btn-primary {
-  background-color: #1DA1F2;
+  background-color: #16704f;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #1991DB;
+  background-color: #10583e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(22, 112, 79, 0.18);
 }
 
 .btn-secondary {
-  background-color: #E1E8ED;
-  color: #14171A;
+  background-color: #e8f2ec;
+  color: #17241f;
 }
 
 .btn-secondary:hover {
-  background-color: #D1D9DD;
+  background-color: #dcebe1;
 }
 
 .btn-danger {
@@ -56,13 +59,13 @@
   display: block;
   margin-bottom: 5px;
   font-weight: 600;
-  color: #14171A;
+  color: #17241f;
 }
 
 .form-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #E1E8ED;
+  border: 1px solid #e5e9e4;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
@@ -70,13 +73,14 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #1DA1F2;
+  border-color: #16704f;
+  box-shadow: 0 0 0 3px rgba(22, 112, 79, 0.12);
 }
 
 .form-textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #E1E8ED;
+  border: 1px solid #e5e9e4;
   border-radius: 8px;
   font-size: 16px;
   resize: vertical;
@@ -86,22 +90,23 @@
 
 .form-textarea:focus {
   outline: none;
-  border-color: #1DA1F2;
+  border-color: #16704f;
+  box-shadow: 0 0 0 3px rgba(22, 112, 79, 0.12);
 }
 
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #E1E8ED;
+  box-shadow: 0 8px 24px rgba(27, 47, 37, 0.05);
+  border: 1px solid #e5e9e4;
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #657786;
+  color: #68766f;
 }
 
 .error {
