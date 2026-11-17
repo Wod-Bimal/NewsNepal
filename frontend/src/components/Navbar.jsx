@@ -7,8 +7,9 @@ import styled from 'styled-components';
 import NotificationsBell from './NotificationsBell.jsx';
 
 const Nav = styled.nav`
-  background: white;
-  border-bottom: 1px solid #E1E8ED;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e5e9e4;
+  backdrop-filter: blur(16px);
   padding: 0;
   position: sticky;
   top: 0;
@@ -16,20 +17,26 @@ const Nav = styled.nav`
 `;
 
 const NavContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  height: 60px;
+  height: 68px;
 `;
 
 const Logo = styled(Link)`
-  font-size: 24px;
-  font-weight: bold;
-  color: #1DA1F2;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: #16704f;
   text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: #10583e;
+  }
 `;
 
 const Hamburger = styled.button`
@@ -37,7 +44,7 @@ const Hamburger = styled.button`
   background: none;
   border: none;
   font-size: 24px;
-  color: #14171A;
+  color: #17241f;
   cursor: pointer;
   padding: 4px;
 
@@ -55,11 +62,12 @@ const NavLinks = styled.div`
 
   @media (max-width: 768px) {
     position: fixed;
-    top: 60px;
+    top: 68px;
     left: 0;
     right: 0;
     bottom: 0;
-    background: white;
+    background: #fff;
+    box-shadow: 0 16px 30px rgba(23, 36, 31, 0.08);
     flex-direction: column;
     align-items: stretch;
     gap: 0;
@@ -72,43 +80,48 @@ const NavLinks = styled.div`
 `;
 
 const NavLink = styled(Link)`
-  color: #14171A;
+  color: #42534a;
   text-decoration: none;
   font-weight: 600;
   padding: 8px 16px;
   border-radius: 20px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    background-color: #F7F9FA;
+    background-color: #f0f5f1;
+    color: #16704f;
   }
 
   @media (max-width: 768px) {
     padding: 14px 20px;
-    border-radius: 0;
+    border-radius: 10px;
     font-size: 16px;
+    margin: 2px 12px;
   }
 `;
 
 const Button = styled.button`
-  background: ${props => props.$primary ? '#1DA1F2' : 'transparent'};
-  color: ${props => props.$primary ? 'white' : '#1DA1F2'};
-  border: ${props => props.$primary ? 'none' : '1px solid #1DA1F2'};
+  background: ${props => props.$primary ? '#16704f' : 'transparent'};
+  color: ${props => props.$primary ? 'white' : '#16704f'};
+  border: ${props => props.$primary ? 'none' : '1px solid #c8dacf'};
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    background: ${props => props.$primary ? '#1991DB' : '#F7F9FA'};
+    background: ${props => props.$primary ? '#10583e' : '#f0f5f1'};
+    transform: translateY(-1px);
   }
 
   @media (max-width: 768px) {
     padding: 14px 20px;
-    border-radius: 0;
+    border-radius: 999px;
     font-size: 16px;
     text-align: center;
+    margin: 6px 20px;
   }
 `;
 
@@ -121,7 +134,7 @@ const UserInfo = styled.div`
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    border-top: 1px solid #E1E8ED;
+    border-top: 1px solid #e5e9e4;
     margin-top: 8px;
     padding-top: 8px;
   }
@@ -150,7 +163,7 @@ const Username = styled.span`
 
 const LogoutButton = styled(Button)`
   @media (max-width: 768px) {
-    border-top: 1px solid #E1E8ED;
+    border-top: 1px solid #e5e9e4;
   }
 `;
 
@@ -164,7 +177,7 @@ const MobileOverlay = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.3);
+    background: rgba(19, 34, 27, 0.34);
     z-index: 98;
   }
 `;
@@ -179,6 +192,10 @@ const RightControls = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
 `;
 
 const Navbar = () => {
